@@ -42,7 +42,6 @@
       <button><img src="icons/hamburger_icon.svg" class="icon" alt="Navigation" /></button>
       <button><img src="icons/gear_icon.svg" class="icon" alt="Settings" /></button>
       <button><img src="icons/code_icon.svg" class="icon" alt="Code" /></button>
-      <button><img src="icons/plus_icon.svg" class="icon" alt="Add Button" /></button>
       <button><img src="icons/ellipsis_icon.svg" class="icon" alt="Close Menu" /></button>
     </div>
     </header>
@@ -110,6 +109,11 @@
     <p>Logical Width: <span id="logicalWidthDisplay"></span>px</p>
     <p>Logical Height: <span id="logicalHeightDisplay"></span>px</p>
   </div>
+</div>
+
+<!-- Floating Add Button -->
+<div id="addButtonFloating" class="disabled">
+  <img src="icons/plus_icon.svg" class="icon" alt="Add Button" />
 </div>
 
 <!-- Embedded iPhone sizes data as fallback -->
@@ -474,6 +478,16 @@
         menu.classList.remove('open');
       });
     }
+    
+    // Floating Add Button click handler
+    const addButtonFloating = document.getElementById('addButtonFloating');
+    addButtonFloating.addEventListener('click', function() {
+      // Only allow click if not disabled
+      if (!this.classList.contains('disabled')) {
+        console.log('Add Button clicked - would add a button to the skin');
+        // Add your button creation logic here
+      }
+    });
 
     // Code overlay
     const codeBtn = document.querySelector('#contextMenu button img[alt="Code"]').parentElement;
@@ -522,6 +536,7 @@
       const dimensionsDiv = document.getElementById('phoneDimensions');
       const logicalDimensionsDiv = document.getElementById('logicalDimensions');
       const screenRepresentation = document.getElementById('screenRepresentation');
+      const addButtonFloating = document.getElementById('addButtonFloating');
       
       if (selectedModel) {
         // Find the selected phone model data
@@ -545,6 +560,9 @@
           
           // Hide the message when a phone is selected
           document.getElementById('screenMessage').style.display = 'none';
+          
+          // Enable the floating Add Button when a phone is selected
+          addButtonFloating.classList.remove('disabled');
         } else {
           dimensionsDiv.style.display = 'none';
           logicalDimensionsDiv.style.display = 'none';
@@ -552,6 +570,9 @@
           screenRepresentation.style.width = '100%';
           screenRepresentation.style.height = '100%';
           document.getElementById('screenMessage').style.display = 'block';
+          
+          // Disable the floating Add Button when no valid phone is selected
+          addButtonFloating.classList.add('disabled');
         }
       } else {
         dimensionsDiv.style.display = 'none';
@@ -560,6 +581,9 @@
         screenRepresentation.style.width = '100%';
         screenRepresentation.style.height = '100%';
         document.getElementById('screenMessage').style.display = 'block';
+        
+        // Disable the floating Add Button when no phone is selected
+        addButtonFloating.classList.add('disabled');
       }
     });
     
