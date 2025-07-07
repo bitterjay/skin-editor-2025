@@ -1,0 +1,328 @@
+{
+  "name" : "Name",
+  "identifier" : "com.delta.n64.standard",
+  "gameTypeIdentifier" : "com.rileytestut.delta.game.n64",
+  "debug" : true,
+  "representations" : {
+    "iphone" : {
+      "standard": {
+        "portrait": {
+          "assets": {
+            "resizable": "iphone_portrait.pdf"
+          },
+          "items": [
+            {
+              "thumbstick": {
+                "name": "portrait_thumbstick.pdf",
+                "width": 85,
+                "height": 87
+              },
+              "inputs": {
+                "up": "analogStickUp",
+                "down": "analogStickDown",
+                "left": "analogStickLeft",
+                "right": "analogStickRight"
+              },
+              "frame": {
+                "x": 39,
+                "y": 77,
+                "width": 71,
+                "height": 71
+              },
+              "extendedEdges": {
+                "top": 20,
+                "bottom": 20,
+                "left": 20,
+                "right": 20
+              }
+            },
+            {
+              "inputs": {
+                "up": "up",
+                "down": "down",
+                "left": "left",
+                "right": "right"
+              },
+              "frame": {
+                "x": 17,
+                "y": 195,
+                "width": 120,
+                "height": 120
+              },
+              "extendedEdges": {
+                "top": 15,
+                "bottom": 15,
+                "left": 17,
+                "right": 7
+              }
+            },
+            {
+              "inputs": [
+                "a"
+              ],
+              "frame": {
+                "x": 247,
+                "y": 122,
+                "width": 56,
+                "height": 56
+              },
+              "extendedEdges": {
+                "right": 17,
+                "top": 15
+              }
+            },
+            {
+              "inputs": [
+                "b"
+              ],
+              "frame": {
+                "x": 171,
+                "y": 98,
+                "width": 56,
+                "height": 56
+              }
+            },
+            {
+              "inputs": [
+                "z"
+              ],
+              "frame": {
+                "x": 229,
+                "y": 50,
+                "width": 56,
+                "height": 56
+              },
+              "extendedEdges": {
+                "bottom": 15
+              }
+            },
+            {
+              "inputs": [
+                "l"
+              ],
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 95,
+                "height": 30
+              }
+            },
+            {
+              "inputs": [
+                "r"
+              ],
+              "frame": {
+                "x": 225,
+                "y": 0,
+                "width": 95,
+                "height": 30
+              }
+            },
+            {
+              "inputs": [
+                "start"
+              ],
+              "frame": {
+                "x": 144,
+                "y": 179,
+                "width": 32,
+                "height": 32
+              },
+              "extendedEdges": {
+                "left": 0
+              }
+            },
+            {
+              "inputs": [
+                "menu"
+              ],
+              "frame": {
+                "x": 150,
+                "y": 34,
+                "width": 18,
+                "height": 18
+              }
+            },
+            {
+              "inputs": [
+                "cUp"
+              ],
+              "frame": {
+                "x": 215,
+                "y": 197,
+                "width": 42,
+                "height": 42
+              },
+              "extendedEdges": {
+                "bottom": 0,
+                "left": 0,
+                "right": 0
+              }
+            },
+            {
+              "inputs": [
+                "cDown"
+              ],
+              "frame": {
+                "x": 215,
+                "y": 276,
+                "width": 42,
+                "height": 42
+              },
+              "extendedEdges": {
+                "top": 0,
+                "left": 0,
+                "right": 0
+              }
+            },
+            {
+              "inputs": [
+                "cLeft"
+              ],
+              "frame": {
+                "x": 177,
+                "y": 236,
+                "width": 42,
+                "height": 42
+              },
+              "extendedEdges": {
+                "top": 0,
+                "bottom": 0,
+                "right": 0
+              }
+            },
+            {
+              "inputs": [
+                "cRight"
+              ],
+              "frame": {
+                "x": 255,
+                "y": 237,
+                "width": 42,
+                "height": 42
+              },
+              "extendedEdges": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 23
+              }
+            },
+            {
+              "inputs": [
+                "quickSave",
+              ],
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width" :0,
+                "height": 0
+              },
+              "extendedEdges": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 23
+              }
+            },
+            {
+              "inputs": [
+                "quickLoad",
+              ],
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width" :0,
+                "height": 0
+              },
+              "extendedEdges": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 23
+              }
+            },
+            {
+              "inputs": [
+                "fastForward",
+              ],
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width" :0,
+                "height": 0
+              },
+              "extendedEdges": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 23
+              }
+            },
+            {
+              "inputs": [
+                "toggleFastForward",
+              ],
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width" :0,
+                "height": 0
+              },
+              "extendedEdges": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 23
+              }
+            },
+            {
+              "inputs": [
+                "menu",
+              ],
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width" :0,
+                "height": 0
+              },
+              "extendedEdges": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 23
+              }
+            }
+          ],
+          
+          "screens": [
+            {
+              "inputFrame": {
+                "x": 0,
+                "y": 0,
+                "width": 256,
+                "height": 192
+              },
+              "outputFrame": {
+                "x": 0,
+                "y": 103,
+                "width": 320,
+                "height": 213
+              }
+            }
+          ],
+          "mappingSize": {
+            "width": 414,
+            "height": 736
+          },
+          "extendedEdges": {
+            "top": 7,
+            "bottom": 7,
+            "left": 7,
+            "right": 7
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "",
+  "identifier": "",
+  "gameTypeIdentifier": "",
+  "debug": false,
+  "representations": {
+    "iphone": {
+      "edgeToEdge": {
+        "portrait": {
+          "assets": {},
+          "items": [],
+          "mappingSize": {
+            "width": 0,
+            "height": 0
+          },
+          "extendedEdges": {},
+          "menuInsets": {}
+        },
+        "landscape": {
+          "assets": {},
+          "items": [],
+          "mappingSize": {
+            "width": 0,
+            "height": 0
+          },
+          "extendedEdges": {},
+          "menuInsets": {}
+        }
+      }
+    }
+  }
+}
