@@ -1,0 +1,170 @@
+[
+  {
+    "Button": "a",
+    "GB(C)": 1,
+    "GBA": 1,
+    "NDS": 1,
+    "NES": 1,
+    "SNES": 1,
+    "N64": 1,
+    "SG": 1
+  },
+  {
+    "Button": "b",
+    "GB(C)": 1,
+    "GBA": 1,
+    "NDS": 1,
+    "NES": 1,
+    "SNES": 1,
+    "N64": 1,
+    "SG": 1
+  },
+  {
+    "Button": "c",
+    "GB(C)": 0,
+    "GBA": 0,
+    "NDS": 0,
+    "NES": 0,
+    "SNES": 0,
+    "N64": 0,
+    "SG": 1
+  },
+  {
+    "Button": "x",
+    "GB(C)": 0,
+    "GBA": 0,
+    "NDS": 1,
+    "NES": 0,
+    "SNES": 1,
+    "N64": 0,
+    "SG": 1
+  },
+  {
+    "Button": "y",
+    "GB(C)": 0,
+    "GBA": 0,
+    "NDS": 1,
+    "NES": 0,
+    "SNES": 0,
+    "N64": 0,
+    "SG": 1
+  },
+  {
+    "Button": "select",
+    "GB(C)": 1,
+    "GBA": 1,
+    "NDS": 1,
+    "NES": 1,
+    "SNES": 1,
+    "N64": 0,
+    "SG": 0
+  },
+  {
+    "Button": "start",
+    "GB(C)": 1,
+    "GBA": 1,
+    "NDS": 1,
+    "NES": 1,
+    "SNES": 1,
+    "N64": 1,
+    "SG": 1
+  },
+  {
+    "Button": "mode",
+    "GB(C)": 0,
+    "GBA": 0,
+    "NDS": 0,
+    "NES": 0,
+    "SNES": 0,
+    "N64": 0,
+    "SG": 1
+  },
+  {
+    "Button": "dpad",
+    "GB(C)": 1,
+    "GBA": 1,
+    "NDS": 1,
+    "NES": 1,
+    "SNES": 1,
+    "N64": 1,
+    "SG": 1
+  },
+  {
+    "Button": "cUp",
+    "GB(C)": 0,
+    "GBA": 0,
+    "NDS": 0,
+    "NES": 0,
+    "SNES": 0,
+    "N64": 1,
+    "SG": 0
+  },
+  {
+    "Button": "cDown",
+    "GB(C)": 0,
+    "GBA": 0,
+    "NDS": 0,
+    "NES": 0,
+    "SNES": 0,
+    "N64": 1,
+    "SG": 0
+  },
+  {
+    "Button": "cLeft",
+    "GB(C)": 0,
+    "GBA": 0,
+    "NDS": 0,
+    "NES": 0,
+    "SNES": 0,
+    "N64": 1,
+    "SG": 0
+  },
+  {
+    "Button": "cRight",
+    "GB(C)": 0,
+    "GBA": 0,
+    "NDS": 0,
+    "NES": 0,
+    "SNES": 0,
+    "N64": 1,
+    "SG": 0
+  },
+  {
+    "Button": "thumbstick",
+    "GB(C)": 1,
+    "GBA": 1,
+    "NDS": 1,
+    "NES": 1,
+    "SNES": 1,
+    "N64": 1,
+    "SG": 1
+  },
+  {
+    "Button": "l",
+    "GBA": 1,
+    "NDS": 1,
+    "NES": 0,
+    "SNES": 1,
+    "N64": 1,
+    "SG": 0
+  },
+  {
+    "Button": "r",
+    "GBA": 1,
+    "NDS": 1,
+    "NES": 0,
+    "SNES": 1,
+    "N64": 1,
+    "SG": 0
+  },
+  {
+    "Button": "z",
+    "GB(C)": 0,
+    "GBA": 0,
+    "NDS": 0,
+    "NES": 0,
+    "SNES": 0,
+    "N64": 1,
+    "SG": 0
+  }
+]
