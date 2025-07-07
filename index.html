@@ -116,6 +116,50 @@
   <img src="icons/plus_icon.svg" class="icon" alt="Add Button" />
 </div>
 
+<!-- Add Control Overlay -->
+<div class="overlay" id="addControlOverlay">
+  <div class="overlay-context-menu" id="addControlMenu">
+    <button id="addControlClose"><img src="icons/close_icon.svg" class="icon" alt="Close" /></button>
+  </div>
+  <div class="overlay-content">
+    <h2>Add Control</h2>
+    
+    <label for="controlType">Control Type</label>
+    <select id="controlType">
+      <option value="">Select a control type</option>
+      <option value="thumbstick">Thumbstick</option>
+      <option value="dpad">D-Pad</option>
+      <option value="button">Button</option>
+    </select>
+    
+    <!-- Button-specific options (hidden by default) -->
+    <div id="buttonOptions" style="display: none;">
+      <label for="buttonType">Button Type</label>
+      <select id="buttonType">
+        <option value="A">A Button</option>
+        <option value="B">B Button</option>
+      </select>
+    </div>
+    
+    <!-- Common control properties -->
+    <div id="controlProperties">
+      <label for="xPosition">X Position</label>
+      <input type="number" id="xPosition" value="0" />
+      
+      <label for="yPosition">Y Position</label>
+      <input type="number" id="yPosition" value="0" />
+      
+      <label for="controlWidth">Width</label>
+      <input type="number" id="controlWidth" value="50" />
+      
+      <label for="controlHeight">Height</label>
+      <input type="number" id="controlHeight" value="50" />
+    </div>
+    
+    <button id="confirmAddControl" class="confirm-button">Confirm</button>
+  </div>
+</div>
+
 <!-- Embedded iPhone sizes data as fallback -->
 <script id="iphoneSizesData" type="application/json">
 [
@@ -481,12 +525,84 @@
     
     // Floating Add Button click handler
     const addButtonFloating = document.getElementById('addButtonFloating');
+    const addControlOverlay = document.getElementById('addControlOverlay');
+    
     addButtonFloating.addEventListener('click', function() {
       // Only allow click if not disabled
       if (!this.classList.contains('disabled')) {
-        console.log('Add Button clicked - would add a button to the skin');
-        // Add your button creation logic here
+        console.log('Add Button clicked - opening control overlay');
+        // Show the add control overlay
+        addControlOverlay.style.display = 'flex';
+        
+        // Reset form values
+        document.getElementById('controlType').value = '';
+        document.getElementById('buttonOptions').style.display = 'none';
+        document.getElementById('xPosition').value = '0';
+        document.getElementById('yPosition').value = '0';
+        document.getElementById('controlWidth').value = '50';
+        document.getElementById('controlHeight').value = '50';
       }
+    });
+    
+    // Control type selection handler
+    document.getElementById('controlType').addEventListener('change', function() {
+      const buttonOptions = document.getElementById('buttonOptions');
+      
+      if (this.value === 'button') {
+        buttonOptions.style.display = 'block';
+      } else {
+        buttonOptions.style.display = 'none';
+      }
+    });
+    
+    // Add Control overlay close button
+    document.getElementById('addControlClose').addEventListener('click', function() {
+      addControlOverlay.style.display = 'none';
+    });
+    
+    // Confirm Add Control button
+    document.getElementById('confirmAddControl').addEventListener('click', function() {
+      const controlType = document.getElementById('controlType').value;
+      
+      if (!controlType) {
+        alert('Please select a control type');
+        return;
+      }
+      
+      // Get control properties
+      const xPosition = parseInt(document.getElementById('xPosition').value) || 0;
+      const yPosition = parseInt(document.getElementById('yPosition').value) || 0;
+      const width = parseInt(document.getElementById('controlWidth').value) || 50;
+      const height = parseInt(document.getElementById('controlHeight').value) || 50;
+      
+      // Create the control element
+      const controlElement = document.createElement('div');
+      controlElement.className = 'control-element';
+      controlElement.style.left = xPosition + 'px';
+      controlElement.style.top = yPosition + 'px';
+      controlElement.style.width = width + 'px';
+      controlElement.style.height = height + 'px';
+      
+      // Set control-specific properties
+      if (controlType === 'button') {
+        const buttonType = document.getElementById('buttonType').value;
+        controlElement.textContent = buttonType;
+        controlElement.dataset.controlType = 'button';
+        controlElement.dataset.buttonType = buttonType;
+      } else if (controlType === 'thumbstick') {
+        controlElement.textContent = 'Thumbstick';
+        controlElement.dataset.controlType = 'thumbstick';
+      } else if (controlType === 'dpad') {
+        controlElement.textContent = 'D-Pad';
+        controlElement.dataset.controlType = 'dpad';
+      }
+      
+      // Add the control to the screen representation
+      const screenRepresentation = document.getElementById('screenRepresentation');
+      screenRepresentation.appendChild(controlElement);
+      
+      // Close the overlay
+      addControlOverlay.style.display = 'none';
     });
 
     // Code overlay
