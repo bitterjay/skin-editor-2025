@@ -48,10 +48,10 @@ class UIService {
       extendedEdgeTopInput: document.getElementById('extendedEdgeTop'),
       extendedEdgeBottomInput: document.getElementById('extendedEdgeBottom'),
       extendedEdgeLeftInput: document.getElementById('extendedEdgeLeft'),
-      extendedEdgeRightInput: document.getElementById('extendedEdgeRight')
+      extendedEdgeRightInput: document.getElementById('extendedEdgeRight'),
+      thumbstickOptions: document.getElementById('thumbstickOptions'),
+      thumbstickImage: document.getElementById('thumbstickImage')
     };
-    this.buttonOverlay.thumbstickOptions = document.getElementById('thumbstickOptions');
-    this.buttonOverlay.thumbstickImage = document.getElementById('thumbstickImage');
     this.settingsFields = {
       name: document.getElementById('skinName'),
       identifier: document.getElementById('skinIdentifier'),
@@ -59,6 +59,12 @@ class UIService {
       closeBtn: document.getElementById('settingsClose')
     };
     this.debugToggle = document.getElementById('debugToggle');
+    // Control options panel
+    this.controlOptionsPanel = document.getElementById('controlOptionsPanel');
+    this.moveButton = document.getElementById('moveButton');
+    this.editButton = document.getElementById('editButton');
+    this.deleteButton = document.getElementById('deleteButton');
+    this.selectedControl = null;
     // Data stores
     this.iphoneSizes = [];
     this.gameTypes = [];
@@ -66,7 +72,6 @@ class UIService {
   }
 
   async init() {
-    // load config and data
     await loadConfig();
     [ this.iphoneSizes, this.gameTypes, this.availableButtons ] = await Promise.all([
       getIphoneSizes(),
@@ -75,8 +80,9 @@ class UIService {
     ]);
     this.bindMenu();
     this.bindGlobalEvents();
+    this.bindControlOptions();
     this.populateDropdowns();
-    this.renderConfig();
+    this.renderCode();
     this.onGameTypeChange();
   }
 
@@ -86,27 +92,24 @@ class UIService {
     });
   }
 
-  populateDropdowns() {
-    // phone models
-    this.phoneSelect.innerHTML = '<option value="">Select a phone model</option>' +
-      this.iphoneSizes.map(p => `<option value="${p.model}">${p.model}</option>`).join('');
-    this.phoneSelect.value = this.iphoneSizes.find(p => p.model === 'iPhone 15 Pro')?.model || '';
-    this.phoneSelect.dispatchEvent(new Event('change'));
-    // game types
-      this.gameSelect.innerHTML = '<option value="">Select a console</option>' +
-        this.gameTypes.map(g => `<option value="${g.gameTypeIdentifier}">${g.console}</option>`).join('');
-      this.gameSelect.value = getConfig().gameTypeIdentifier || '';
-      this.gameSelect.dispatchEvent(new Event('change'));
-  }
-
   bindGlobalEvents() {
     this.phoneSelect.addEventListener('change', () => this.onPhoneChange());
     this.screenOrientation.addEventListener('change', () => this.onOrientationChange());
     this.gameSelect.addEventListener('change', () => this.onGameTypeChange());
     this.addButton.addEventListener('click', () => this.toggleAddOverlay());
     this.buttonOverlay.closeBtn.addEventListener('click', () => this.overlays.addControl.style.display = 'none');
-    this.buttonOverlay.confirmBtn.addEventListener('click', () => this.onAddControl());
-    // show extra thumbstick fields if thumbstick selected
+    // Only one event listener for confirmBtn, handles both add and update
+    this.buttonOverlay.confirmBtn.addEventListener('click', () => {
+      if (this.isEditing && this.editingControlId) {
+        this.onUpdateControl(this.editingControlId);
+        this.isEditing = false;
+        this.editingControlId = null;
+        this.buttonOverlay.confirmBtn.textContent = 'Confirm';
+        delete this.buttonOverlay.confirmBtn.dataset.editingId;
+      } else {
+        this.onAddControl();
+      }
+    });
     this.buttonOverlay.typeSelect.addEventListener('change', () => {
       if (this.buttonOverlay.typeSelect.value === 'thumbstick') {
         this.buttonOverlay.thumbstickOptions.style.display = 'block';
@@ -114,13 +117,25 @@ class UIService {
         this.buttonOverlay.thumbstickOptions.style.display = 'none';
       }
     });
+    
+    // Debug button to show control options panel
+    const debugShowPanel = document.getElementById('debugShowPanel');
+    if (debugShowPanel) {
+      debugShowPanel.addEventListener('click', () => {
+        console.log('Debug button clicked, showing control options panel');
+        this.controlOptionsPanel.style.display = 'flex';
+        this.controlOptionsPanel.style.visibility = 'visible';
+        this.controlOptionsPanel.style.opacity = '1';
+        this.controlOptionsPanel.classList.remove('hidden');
+      });
+    }
     this.settingsFields.saveBtn.addEventListener('click', () => this.onSaveSettings());
     this.settingsFields.closeBtn.addEventListener('click', () => this.overlays.settings.style.display = 'none');
     this.debugToggle.addEventListener('change', () => {
       updateConfig({ debug: this.debugToggle.checked });
       this.renderCode();
     });
-    // context menu actions
+    // context menu
     document.querySelector('#contextMenu button img[alt="Code"]').parentElement
       .addEventListener('click', () => this.showOverlay('code'));
     document.querySelector('#contextMenu button img[alt="Settings"]').parentElement
@@ -135,14 +150,118 @@ class UIService {
       .addEventListener('click', () => this.overlays.gear.style.display = 'none');
   }
 
+  bindControlOptions() {
+    // Initialize the control options panel
+    // Force it to be hidden initially
+    this.controlOptionsPanel.classList.add('hidden');
+    console.log('Control options panel initialized:', this.controlOptionsPanel);
+    
+    // Show panel on control click
+    this.screen.addEventListener('click', e => {
+      console.log('Screen clicked', e.target);
+      const wrapper = e.target.closest('.button-representation');
+      if (wrapper) {
+        console.log('Button representation clicked', wrapper);
+        this.selectedControl = wrapper;
+        
+        // Force panel to be visible and in the DOM
+        this.controlOptionsPanel.style.display = 'flex';
+        this.controlOptionsPanel.style.visibility = 'visible';
+        this.controlOptionsPanel.style.opacity = '1';
+        
+        // Debug the panel state
+        console.log('Panel before showing:', {
+          display: this.controlOptionsPanel.style.display,
+          visibility: this.controlOptionsPanel.style.visibility,
+          opacity: this.controlOptionsPanel.style.opacity,
+          transform: this.controlOptionsPanel.style.transform,
+          classList: [...this.controlOptionsPanel.classList]
+        });
+        
+        // Use setTimeout to ensure the display change takes effect before removing 'hidden'
+        setTimeout(() => {
+          this.controlOptionsPanel.classList.remove('hidden');
+          console.log('Panel after showing (hidden class removed):', {
+            display: this.controlOptionsPanel.style.display,
+            visibility: this.controlOptionsPanel.style.visibility,
+            opacity: this.controlOptionsPanel.style.opacity,
+            transform: this.controlOptionsPanel.style.transform,
+            classList: [...this.controlOptionsPanel.classList]
+          });
+        }, 10);
+      }
+    });
+    
+    // Direct event listeners on each button representation
+    // This ensures we catch clicks even if event delegation fails
+    const updateButtonListeners = () => {
+      document.querySelectorAll('.button-representation').forEach(btn => {
+        // Only add if not already added
+        if (!btn.hasAttribute('data-has-click-listener')) {
+          btn.setAttribute('data-has-click-listener', 'true');
+          btn.addEventListener('click', e => {
+            console.log('Direct button click', btn);
+            this.selectedControl = btn;
+            
+            // Force panel to be visible
+            this.controlOptionsPanel.style.display = 'flex';
+            // Use setTimeout to ensure the display change takes effect before removing 'hidden'
+            setTimeout(() => {
+              this.controlOptionsPanel.classList.remove('hidden');
+            }, 10);
+            
+            e.stopPropagation(); // Prevent bubbling
+          });
+        }
+      });
+    };
+    
+    // Initial setup
+    updateButtonListeners();
+    
+    // Setup a mutation observer to watch for new buttons
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        if (mutation.addedNodes.length) {
+          updateButtonListeners();
+        }
+      });
+    });
+    
+    // Start observing
+    observer.observe(this.screen, { childList: true, subtree: true });
+    
+    // Option buttons
+    this.moveButton.addEventListener('click', () => this.onMoveControl());
+    this.editButton.addEventListener('click', () => this.onEditControl());
+    this.deleteButton.addEventListener('click', () => this.onDeleteControl());
+    
+    // Hide when clicking outside
+    window.addEventListener('click', e => {
+      if (!e.target.closest('.button-representation') && !e.target.closest('#controlOptionsPanel')) {
+        this.controlOptionsPanel.classList.add('hidden');
+      }
+    });
+  }
+
+  populateDropdowns() {
+    this.phoneSelect.innerHTML = '<option value="">Select a phone model</option>' +
+      this.iphoneSizes.map(p => `<option value="${p.model}">${p.model}</option>`).join('');
+    this.phoneSelect.value = this.iphoneSizes.find(p => p.model === 'iPhone 15 Pro')?.model || '';
+    this.phoneSelect.dispatchEvent(new Event('change'));
+
+    this.gameSelect.innerHTML = '<option value="">Select a console</option>' +
+      this.gameTypes.map(g => `<option value="${g.gameTypeIdentifier}">${g.console}</option>`).join('');
+    this.gameSelect.value = getConfig().gameTypeIdentifier || '';
+    this.gameSelect.dispatchEvent(new Event('change'));
+  }
+
   onPhoneChange() {
     const model = this.phoneSelect.value;
     const data = this.iphoneSizes.find(p => p.model === model);
     if (data) {
-      const orientation = this.screenOrientation.value;
-      let w = data.logicalWidth;
-      let h = data.logicalHeight;
-      if (orientation === 'landscape') [w, h] = [h, w];
+      let w = data.logicalWidth, h = data.logicalHeight;
+      if (this.screenOrientation.value === 'landscape') [w, h] = [h, w];
       this.screen.style.width = w + 'px';
       this.screen.style.height = h + 'px';
       this.screenMessage.style.display = 'none';
@@ -159,17 +278,20 @@ class UIService {
     }
   }
 
+  onOrientationChange() {
+    this.onPhoneChange();
+  }
+
   onGameTypeChange() {
     const val = this.gameSelect.value;
-    const cfg = getConfig();
     updateConfig({ gameTypeIdentifier: val });
     this.fullGameTypeIdentifier.textContent = val;
     this.consoleDetailsDisplay.style.display = val ? 'block' : 'none';
     this.toggleAddOverlay(false);
     if (val) {
-      const type = val.split('.').pop();
+      const key = val.split('.').pop();
       const entry = this.gameTypes.find(g => g.gameTypeIdentifier === val);
-      this.consoleIcon.src = `icons/consoles/${type}.png`;
+      this.consoleIcon.src = `icons/consoles/${key}.png`;
       this.consoleName.textContent = entry?.console || '';
       this.consoleInfo.style.display = 'flex';
     } else {
@@ -177,18 +299,17 @@ class UIService {
     }
   }
 
-  toggleAddOverlay(open=true) {
+  toggleAddOverlay(open = true) {
     if (open && !this.addButton.classList.contains('disabled')) {
       this.overlays.addControl.style.display = 'flex';
-      const cfg = getConfig();
-      const game = cfg.gameTypeIdentifier?.split('.').pop();
-      if (!game) {
+      const key = getConfig().gameTypeIdentifier?.split('.').pop();
+      if (!key) {
         this.buttonOverlay.noConsoleMsg.style.display = 'block';
         this.buttonOverlay.optionsContainer.style.display = 'none';
       } else {
         this.buttonOverlay.noConsoleMsg.style.display = 'none';
         this.buttonOverlay.optionsContainer.style.display = 'block';
-        this.populateButtonTypes(game);
+        this.populateButtonTypes(key);
       }
     } else {
       this.overlays.addControl.style.display = 'none';
@@ -219,108 +340,101 @@ class UIService {
     const bottom = +this.buttonOverlay.extendedEdgeBottomInput.value;
     const left = +this.buttonOverlay.extendedEdgeLeftInput.value;
     const right = +this.buttonOverlay.extendedEdgeRightInput.value;
-    // wrap control and outline in a container for this type instance
+
     const count = document.querySelectorAll(`#screenRepresentation div[data-type="${type}"]`).length + 1;
     const wrapper = document.createElement('div');
     wrapper.id = `${type}-${count}`;
-    wrapper.dataset.instance = count;
     wrapper.dataset.type = type;
+    wrapper.dataset.instance = count;
     wrapper.classList.add('button-representation');
-    const el = document.createElement('div');
     wrapper.style.position = 'absolute';
     wrapper.style.left = `${x - left}px`;
     wrapper.style.top = `${y - top}px`;
     wrapper.style.width = `${w + left + right}px`;
     wrapper.style.height = `${h + top + bottom}px`;
-    // create outline
+
     const outline = document.createElement('div');
     outline.className = 'control-outline';
-    outline.style.cssText = `position:absolute;inset:0;border:2px solid rgba(255,0,0,0.4);`;
-    // configure control element
+    outline.style.cssText = 'position:absolute;inset:0;border:2px solid rgba(255,0,0,0.4);background-color:rgba(255,0,0,0.5);pointer-events:none;';
+
+    const el = document.createElement('div');
     el.className = 'control-element';
     el.style.cssText = `position:absolute;left:${left}px;top:${top}px;width:${w}px;height:${h}px`;
-    el.dataset.extendedEdges = JSON.stringify({ top, bottom, left, right });
     el.textContent = type;
-    // assemble
-    wrapper.appendChild(outline);
-    wrapper.appendChild(el);
-    document.getElementById('screenRepresentation').appendChild(wrapper);
+    el.dataset.extendedEdges = JSON.stringify({ top, bottom, left, right });
+
+    wrapper.append(outline, el);
+    this.screen.appendChild(wrapper);
+    
+    // Add click listener to the new button
+    wrapper.addEventListener('click', e => {
+      console.log('New button clicked', wrapper);
+      this.selectedControl = wrapper;
+      
+      // Force panel to be visible
+      this.controlOptionsPanel.style.display = 'flex';
+      // Use setTimeout to ensure the display change takes effect before removing 'hidden'
+      setTimeout(() => {
+        this.controlOptionsPanel.classList.remove('hidden');
+      }, 10);
+      
+      e.stopPropagation(); // Prevent bubbling
+    });
+    wrapper.setAttribute('data-has-click-listener', 'true');
+
     const cfg = getConfig();
     const portrait = cfg.representations.iphone.edgeToEdge.portrait;
-    if (type !== 'dpad' && type !== 'thumbstick') {
-      portrait.items.push({
-        inputs: [type],
-        frame: { x, y, width: w, height: h },
-        extendedEdges: { top, bottom, left, right }
-      });
-    } else if (type === 'thumbstick') {
+    if (type === 'thumbstick') {
       const file = this.buttonOverlay.thumbstickImage.files[0];
       const reader = new FileReader();
       reader.onload = () => {
-        const dataUrl = reader.result;
-        el.style.backgroundImage = `url(${dataUrl})`;
-        el.style.backgroundSize = `${w}px ${h}px`;
-        el.style.backgroundRepeat = 'no-repeat';
-        portrait.items.unshift({
-          thumbstick: { name: file.name, data: dataUrl, width: w, height: h },
-          inputs: {
-            up: 'analogStickUp',
-            down: 'analogStickDown',
-            left: 'analogStickLeft',
-            right: 'analogStickRight'
-          },
-          frame: { x, y, width: w, height: h },
-          extendedEdges: { top, bottom, left, right }
-        });
+        el.style.backgroundImage = `url(${reader.result})`;
         updateConfig({ representations: cfg.representations });
       };
       if (file) reader.readAsDataURL(file);
     } else {
-      portrait.items.push({ type, x, y, width: w, height: h, extendedEdges: { top, bottom, left, right } });
+      portrait.items.push({ inputs: [type], frame: { x,y,width:w,height:h }, extendedEdges: { top,bottom,left,right } });
+      updateConfig({ representations: cfg.representations });
     }
-    updateConfig({ representations: cfg.representations });
-    this.buttonOverlay.thumbstickOptions.style.display = 'none';
+
     this.overlays.addControl.style.display = 'none';
+    this.buttonOverlay.thumbstickOptions.style.display = 'none';
   }
 
   onSaveSettings() {
-    const updates = {
+    updateConfig({
       name: this.settingsFields.name.value,
       identifier: this.settingsFields.identifier.value
-    };
-    updateConfig(updates);
+    });
     this.overlays.settings.style.display = 'none';
   }
 
   showOverlay(key) {
     if (key === 'code') this.renderCode();
     if (key === 'gear') this.debugToggle.checked = getConfig().debug;
-      if (key === 'settings') {
-        const cfg = getConfig();
-        this.settingsFields.name.value = cfg.name;
-        this.settingsFields.identifier.value = cfg.identifier;
-        this.gameSelect.value = cfg.gameTypeIdentifier || '';
-        this.fullGameTypeIdentifier.textContent = cfg.gameTypeIdentifier || '';
-        this.consoleDetailsDisplay.style.display = cfg.gameTypeIdentifier ? 'block' : 'none';
-        this.onGameTypeChange();
-      }
+    if (key === 'settings') {
+      const cfg = getConfig();
+      this.settingsFields.name.value = cfg.name;
+      this.settingsFields.identifier.value = cfg.identifier;
+      this.gameSelect.value = cfg.gameTypeIdentifier || '';
+      this.fullGameTypeIdentifier.textContent = cfg.gameTypeIdentifier || '';
+      this.consoleDetailsDisplay.style.display = cfg.gameTypeIdentifier ? 'block' : 'none';
+    }
     this.overlays[key].style.display = 'flex';
     this.contextMenu.classList.remove('open');
   }
 
 
+  renderConfig() {
+    this.renderCode();
+  }
+
   renderCode() {
     const cfg = getConfig();
     const exportCfg = JSON.parse(JSON.stringify(cfg));
     const portrait = exportCfg.representations?.iphone?.edgeToEdge?.portrait;
-    if (portrait && Array.isArray(portrait.items)) {
-      portrait.items.forEach(item => {
-            if (item.thumbstick && item.thumbstick.name) {
-              delete item.thumbstick.data;
-            }
-      });
-    }
-    this.codeContent.textContent = JSON.stringify(exportCfg,null,2);
+    if (portrait) portrait.items.forEach(item => { if (item.thumbstick) delete item.thumbstick.data; });
+    this.codeContent.textContent = JSON.stringify(exportCfg, null, 2);
   }
 
   resetScreen() {
@@ -331,26 +445,269 @@ class UIService {
     this.addButton.classList.add('disabled');
   }
 
-  onOrientationChange() {
-    const orientation = this.screenOrientation.value;
-    const model = this.phoneSelect.value;
-    const data = this.iphoneSizes.find(p => p.model === model);
-    if (data) {
-      let w = data.logicalWidth;
-      let h = data.logicalHeight;
-      if (orientation === 'landscape') [w, h] = [h, w];
-      this.screen.style.width = w + 'px';
-      this.screen.style.height = h + 'px';
-      this.logicalDisplay.width.textContent = w;
-      this.logicalDisplay.height.textContent = h;
-      const cfg = getConfig();
-      cfg.representations.iphone.edgeToEdge.portrait.mappingSize = { width: w, height: h };
+  // Control options handlers
+  onMoveControl() {
+    if (!this.selectedControl) return;
+    
+    // Set a flag to indicate we're in move mode
+    this.selectedControl.classList.add('moving');
+    
+    // Store initial position
+    const initialX = parseInt(this.selectedControl.style.left) || 0;
+    const initialY = parseInt(this.selectedControl.style.top) || 0;
+    
+    // Store initial mouse position
+    let startX, startY;
+    
+    const onMouseDown = (e) => {
+      // Get initial mouse position
+      startX = e.clientX;
+      startY = e.clientY;
+      
+      // Add event listeners for mouse movement and release
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+      
+      // Prevent default behavior
+      e.preventDefault();
+    };
+    
+    const onMouseMove = (e) => {
+      if (!this.selectedControl.classList.contains('moving')) return;
+      
+      // Calculate new position
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+      
+      // Update position
+      this.selectedControl.style.left = `${initialX + deltaX}px`;
+      this.selectedControl.style.top = `${initialY + deltaY}px`;
+    };
+    
+    const onMouseUp = () => {
+      // Remove moving class
+      this.selectedControl.classList.remove('moving');
+      
+      // Remove event listeners
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      
+      // Update config with new position
+      this.updateControlPosition();
+    };
+    
+    // Add mousedown event listener to the control
+    this.selectedControl.addEventListener('mousedown', onMouseDown);
+    
+    // Show message to user
+    const message = document.createElement('div');
+    message.className = 'move-message';
+    message.textContent = 'Click and drag to move the button';
+    message.style.position = 'absolute';
+    message.style.top = '-30px';
+    message.style.left = '0';
+    message.style.width = '100%';
+    message.style.textAlign = 'center';
+    message.style.color = '#fff';
+    message.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    message.style.padding = '5px';
+    message.style.borderRadius = '3px';
+    message.style.zIndex = '1000';
+    
+    this.selectedControl.appendChild(message);
+    
+    // Remove message after 3 seconds
+    setTimeout(() => {
+      if (message.parentNode) {
+        message.parentNode.removeChild(message);
+      }
+    }, 3000);
+  }
+  
+  updateControlPosition() {
+    if (!this.selectedControl) return;
+    
+    const controlElement = this.selectedControl.querySelector('.control-element');
+    const type = this.selectedControl.dataset.type;
+    const instance = this.selectedControl.dataset.instance;
+    
+    // Get the new position
+    const left = parseInt(this.selectedControl.style.left) || 0;
+    const top = parseInt(this.selectedControl.style.top) || 0;
+    
+    // Get extended edges
+    const extendedEdgesStr = controlElement.dataset.extendedEdges;
+    const extendedEdges = extendedEdgesStr ? JSON.parse(extendedEdgesStr) : { top: 0, bottom: 0, left: 0, right: 0 };
+    
+    // Calculate actual position (accounting for extended edges)
+    const x = left + extendedEdges.left;
+    const y = top + extendedEdges.top;
+    
+    // Update config
+    const cfg = getConfig();
+    const portrait = cfg.representations.iphone.edgeToEdge.portrait;
+    
+    // Find and update the item in the config
+    const itemIndex = portrait.items.findIndex(item => 
+      item.inputs && item.inputs.includes(type) && 
+      item.frame.x === parseInt(controlElement.style.left) + left &&
+      item.frame.y === parseInt(controlElement.style.top) + top
+    );
+    
+    if (itemIndex !== -1) {
+      portrait.items[itemIndex].frame.x = x;
+      portrait.items[itemIndex].frame.y = y;
       updateConfig({ representations: cfg.representations });
     }
+    
+    // Keep the control options panel visible
+    console.log('Button moved to position:', x, y);
   }
 
-  renderConfig() {
-    this.renderCode();
+  onEditControl() {
+    if (!this.selectedControl) return;
+    
+    // Get the control element and its data
+    const controlElement = this.selectedControl.querySelector('.control-element');
+    const type = this.selectedControl.dataset.type;
+    
+    // Get position and size
+    const left = parseInt(this.selectedControl.style.left) || 0;
+    const top = parseInt(this.selectedControl.style.top) || 0;
+    const width = parseInt(controlElement.style.width) || 0;
+    const height = parseInt(controlElement.style.height) || 0;
+    
+    // Get extended edges
+    const extendedEdgesStr = controlElement.dataset.extendedEdges;
+    const extendedEdges = extendedEdgesStr ? JSON.parse(extendedEdgesStr) : { top: 0, bottom: 0, left: 0, right: 0 };
+    
+    // Calculate actual position (accounting for extended edges)
+    const x = left + extendedEdges.left;
+    const y = top + extendedEdges.top;
+    
+    // Populate the add control overlay with the button's values
+    this.buttonOverlay.typeSelect.value = type;
+    this.buttonOverlay.xInput.value = x;
+    this.buttonOverlay.yInput.value = y;
+    this.buttonOverlay.widthInput.value = width;
+    this.buttonOverlay.heightInput.value = height;
+    this.buttonOverlay.extendedEdgeTopInput.value = extendedEdges.top;
+    this.buttonOverlay.extendedEdgeBottomInput.value = extendedEdges.bottom;
+    this.buttonOverlay.extendedEdgeLeftInput.value = extendedEdges.left;
+    this.buttonOverlay.extendedEdgeRightInput.value = extendedEdges.right;
+    
+    // Show thumbstick options if needed
+    if (type === 'thumbstick') {
+      this.buttonOverlay.thumbstickOptions.style.display = 'block';
+    } else {
+      this.buttonOverlay.thumbstickOptions.style.display = 'none';
+    }
+    
+    // Show the add control overlay
+    this.overlays.addControl.style.display = 'flex';
+    
+    // Store edit state for confirmBtn
+    this.isEditing = true;
+    this.editingControlId = this.selectedControl.id;
+    this.buttonOverlay.confirmBtn.dataset.editingId = this.selectedControl.id;
+
+    // Hide the control options panel
+    this.controlOptionsPanel.classList.add('hidden');
+
+    // Modify the confirm button text to indicate editing
+    this.buttonOverlay.confirmBtn.textContent = 'Update Button';
+  }
+  
+  onUpdateControl(controlId) {
+    const control = document.getElementById(controlId);
+    if (!control) return;
+    
+    const type = this.buttonOverlay.typeSelect.value;
+    if (!type) return alert('Please select a button type');
+    
+    const x = +this.buttonOverlay.xInput.value;
+    const y = +this.buttonOverlay.yInput.value;
+    const w = +this.buttonOverlay.widthInput.value;
+    const h = +this.buttonOverlay.heightInput.value;
+    const top = +this.buttonOverlay.extendedEdgeTopInput.value;
+    const bottom = +this.buttonOverlay.extendedEdgeBottomInput.value;
+    const left = +this.buttonOverlay.extendedEdgeLeftInput.value;
+    const right = +this.buttonOverlay.extendedEdgeRightInput.value;
+    
+    // Update the control element
+    const controlElement = control.querySelector('.control-element');
+    controlElement.textContent = type;
+    controlElement.style.width = `${w}px`;
+    controlElement.style.height = `${h}px`;
+    controlElement.style.left = `${left}px`;
+    controlElement.style.top = `${top}px`;
+    controlElement.dataset.extendedEdges = JSON.stringify({ top, bottom, left, right });
+    
+    // Update the wrapper
+    control.style.left = `${x - left}px`;
+    control.style.top = `${y - top}px`;
+    control.style.width = `${w + left + right}px`;
+    control.style.height = `${h + top + bottom}px`;
+    control.dataset.type = type;
+    
+    // Update the config
+    const cfg = getConfig();
+    const portrait = cfg.representations.iphone.edgeToEdge.portrait;
+    
+    // Find and update the item in the config
+    const oldType = control.dataset.type;
+    const itemIndex = portrait.items.findIndex(item => 
+      item.inputs && item.inputs.includes(oldType)
+    );
+    
+    if (itemIndex !== -1) {
+      portrait.items[itemIndex] = {
+        inputs: [type],
+        frame: { x, y, width: w, height: h },
+        extendedEdges: { top, bottom, left, right }
+      };
+      updateConfig({ representations: cfg.representations });
+    }
+    
+    // Handle thumbstick image if needed
+    if (type === 'thumbstick') {
+      const file = this.buttonOverlay.thumbstickImage.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          controlElement.style.backgroundImage = `url(${reader.result})`;
+          updateConfig({ representations: cfg.representations });
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    
+    // Close the overlay
+    this.overlays.addControl.style.display = 'none';
+  }
+
+  onDeleteControl() {
+    if (this.selectedControl) {
+      // Get the control type and remove from config
+      const type = this.selectedControl.dataset.type;
+      const cfg = getConfig();
+      const portrait = cfg.representations.iphone.edgeToEdge.portrait;
+      
+      // Find and remove the item from the config
+      const itemIndex = portrait.items.findIndex(item => 
+        item.inputs && item.inputs.includes(type)
+      );
+      
+      if (itemIndex !== -1) {
+        portrait.items.splice(itemIndex, 1);
+        updateConfig({ representations: cfg.representations });
+      }
+      
+      // Remove the element from the DOM
+      this.selectedControl.remove();
+      this.selectedControl = null;
+      this.controlOptionsPanel.classList.add('hidden');
+    }
   }
 }
 

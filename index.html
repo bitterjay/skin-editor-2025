@@ -128,7 +128,6 @@
           </div>
         </div>
         <div class="ButtonSizeContainer">
-
           <div id="buttonInputsTop" class="buttonInput">
             <label for="extendedEdgeTop">Extended Edge Top</label>
             <input type="number" id="extendedEdgeTop" value="5" />
@@ -146,16 +145,17 @@
               <label for="controlHeight">Height</label>
               <input type="number" id="controlHeight" value="50" />
             </div>
-            <div id="ButtonExtendedEdgesRightContainer" class="buttonInput  ">
+            <div id="ButtonExtendedEdgesRightContainer" class="buttonInput">
               <label for="extendedEdgeRight">Extended Edge Right</label>
               <input type="number" id="extendedEdgeRight" value="5" />
             </div>
           </div>
-          <div id="buttonInputsBottom " class="buttonInput">
+          <div id="buttonInputsBottom" class="buttonInput">
             <label for="extendedEdgeBottom">Extended Edge Bottom</label>
             <input type="number" id="extendedEdgeBottom" value="5" />
           </div>
         </div>
+      </div>
       
       <button id="confirmAddControl" class="confirm-button">Confirm</button>
     </div>
@@ -163,6 +163,21 @@
 
  
   
+
+  <!-- Control options panel for button editing -->
+  <div id="controlOptionsPanel" class="control-options-panel hidden">
+    <div class="control-options-container">
+      <button id="moveButton" class="option-button">
+        <span class="button-icon">↖</span> Move
+      </button>
+      <button id="editButton" class="option-button">
+        <span class="button-icon">✏️</span> Edit
+      </button>
+      <button id="deleteButton" class="option-button">
+        <span class="button-icon">🗑️</span> Delete
+      </button>
+    </div>
+  </div>
 
   <!-- Bootstrap application -->
   <script type="module" src="js/main.js"></script>

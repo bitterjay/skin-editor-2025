@@ -276,13 +276,14 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
 
 .control-element {
     position: absolute;
-    border: 1px solid blue;
-    background-color: rgba(0, 123, 255, 0.2);
+    border: 1px solid black;
+    background-color: rgb(74, 74, 74);
     display: flex;
     justify-content: center;
     align-items: center;
     font-weight: bold;
-    color: #333;
+    color: #fff;
+    box-sizing:border-box;
 }
 
 #addButtonFloating .icon {
@@ -313,4 +314,87 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     align-items: center;
     justify-content: end;
     width: 100%;
+}
+
+.control-options-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 1001; /* Higher than other elements */
+    transition: transform 0.3s ease;
+    transform: translateY(0);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.control-options-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 0;
+    margin: 0;
+}
+
+.control-options-panel.hidden {
+    transform: translateY(100%);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Exception for control-options-panel */
+.control-options-panel.hidden {
+    display: flex !important;
+}
+
+
+.option-button {
+    background: var(--white);
+    color: black;
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--button-radius);
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.option-button:hover {
+    background-color: #f0f0f0;
+}
+
+.option-button:active {
+    transform: scale(0.95);
+}
+
+.button-icon {
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 16px;
+}
+
+/* Button representation styles */
+.button-representation {
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+
+.button-representation:hover {
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+}
+
+.button-representation.moving {
+    cursor: move;
+    z-index: 950;
+    box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.7), 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.move-message {
+    font-size: 12px;
+    font-weight: bold;
+    pointer-events: none;
 }
