@@ -7,8 +7,6 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-
-
   <header>
     <button class="icon-button" id="menuToggle">
       <img src="icons/ellipsis_icon.svg" class="icon" alt="Menu" />
@@ -17,875 +15,147 @@
       <button><img src="icons/hamburger_icon.svg" class="icon" alt="Navigation" /></button>
       <button><img src="icons/gear_icon.svg" class="icon" alt="Settings" /></button>
       <button><img src="icons/code_icon.svg" class="icon" alt="Code" /></button>
-      <button><img src="icons/ellipsis_icon.svg" class="icon" alt="Close Menu" /></button>
+      <button><img src="icons/close_icon.svg" class="icon" alt="Close Menu" /></button>
     </div>
-    </header>
+  </header>
 
-    <div class="overlay" id="codeOverlay">
-      <div class="overlay-context-menu" id="codeMenu">
-        <button id="codeClose"><img src="icons/close_icon.svg" class="icon" alt="Close" /></button>
-      </div>
-      <pre id="codeContent"></pre>
+  <div class="overlay" id="codeOverlay">
+    <div class="overlay-context-menu" id="codeMenu">
+      <button id="codeClose"><img src="icons/close_icon.svg" class="icon" alt="Close" /></button>
     </div>
+    <pre id="codeContent"></pre>
+  </div>
 
-    <div class="overlay" id="gearSettingsOverlay">
-      <div class="overlay-context-menu" id="gearSettingsMenu">
-        <button id="gearSettingsClose"><img src="icons/close_icon.svg" class="icon" alt="Close" /></button>
-      </div>
-      <div class="overlay-content">
-        <h2>Device Settings</h2>
-        <label for="phoneModel">Phone</label>
-        <select id="phoneModel">
-          <option value="">Select a phone model</option>
-        </select>
-      </div>
+  <div class="overlay" id="gearSettingsOverlay">
+    <div class="overlay-context-menu" id="gearSettingsMenu">
+      <button id="gearSettingsClose"><img src="icons/close_icon.svg" class="icon" alt="Close" /></button>
     </div>
+    <div class="overlay-content">
+      <h2>Device Settings</h2>
+      <label for="phoneModel">Phone</label>
+      <select id="phoneModel">
+        <option value="">Select a phone model</option>
+      </select>
+    </div>
+  </div>
 
-    <div class="overlay" id="settingsOverlay">
-      <div class="overlay-context-menu" id="settingsMenu">
-        <button id="settingsSave">
-          <img src="icons/save_icon.svg" class="icon" alt="Save" />
-        </button>
-        <button id="settingsClose"><img src="icons/close_icon.svg" class="icon" alt="Close" /></button>
-        
-      </div>
-    <!-- skin settings -->
+  <div class="overlay" id="settingsOverlay">
+    <div class="overlay-context-menu" id="settingsMenu">
+      <button id="settingsSave">
+        <img src="icons/save_icon.svg" class="icon" alt="Save" />
+      </button>
+      <button id="settingsClose"><img src="icons/close_icon.svg" class="icon" alt="Close" /></button>
+    </div>
     <div class="overlay-content">
       <h2>Skin Settings</h2>
       <label for="skinName">Name</label>
       <input id="skinName" type="text" placeholder="Enter skin name" />
       <p class="help-text">This is what the skin will be called within Delta's skin selection menu.</p>
-      
+
       <label for="skinIdentifier">Identifier</label>
       <input id="skinIdentifier" type="text" placeholder="com.yourname.console.skinname" />
       <p class="help-text">Follow Apple's reverse-dns format: com.yourname.console.skinname</p>
-      
+
       <label for="gameTypeIdentifier">Console / System</label>
       <select id="gameTypeIdentifier">
-        <!-- Options will be populated dynamically -->
+        <option value="">Select a console</option>
       </select>
-      <div id="consoleDetailsDisplay" style="display: none; margin-top: 10px; padding: 8px; background-color: #f5f5f5; border-radius: 4px;">
-        <p><strong>Game Type Identifier:</strong><br><code id="fullGameTypeIdentifier"></code></p>
+      
+      <p class="help-text" style="margin-bottom:5px">Select which system the skin belongs to.</p>
+      <div id="consoleDetailsDisplay" style="margin-bottom:24px">
+        <code id="fullGameTypeIdentifier"></code>
       </div>
-      <script>
-        document.getElementById('gameTypeIdentifier').addEventListener('change', function() {
-          const consoleDetailsDisplay = document.getElementById('consoleDetailsDisplay');
-          const fullGameTypeIdentifier = document.getElementById('fullGameTypeIdentifier');
-          
-          if (this.value) {
-        fullGameTypeIdentifier.textContent = this.value;
-        consoleDetailsDisplay.style.display = 'block';
-          } else {
-        consoleDetailsDisplay.style.display = 'none';
-          }
-        });
-      </script>
-      <p class="help-text">Select which system the skin belongs to.</p>
       <div class="checkbox-container">
-          <input type="checkbox" id="debugToggle" />
-          <label for="debugToggle">Enable Debug Mode</label>
+        <input type="checkbox" id="debugToggle" />
+        <label for="debugToggle">Enable Debug Mode</label>
+      </div>
+    </div>
+  </div>
+
+  <div id="workArea">
+    <div id="screenRepresentation" style="border: 2px solid red; display: flex; justify-content: center; align-items: center;">
+      <div id="screenMessage" style="font-size: 24px; color: #666;">Select a phone size to get started</div>
+    </div>
+    <div id="logicalDimensions" style="margin-top: 10px; text-align: center; display: none;">
+      <p><strong>Model: <span id="logicalModelDisplay"></span></strong></p>
+      <p>Logical Width: <span id="logicalWidthDisplay"></span>px</p>
+      <p>Logical Height: <span id="logicalHeightDisplay"></span>px</p>
+    </div>
+    <div id="consoleInfo" style="margin-top: 15px; text-align: center; display: none;">
+      <div style="display: flex; align-items: center; justify-content: center;">
+        <img id="consoleIcon" src="" alt="Console Icon" style="height: 32px; margin-right: 10px;">
+        <p><strong>Console: <span id="consoleNameDisplay">None selected</span></strong></p>
+      </div>
+    </div>
+    <div id="addButtonFloating" class="disabled">
+      <img src="icons/plus_icon.svg" class="icon" alt="Add Button" />
+    </div>
+  </div>
+
+  <div class="overlay" id="addControlOverlay">
+    <div class="overlay-context-menu" id="addControlMenu">
+      <button id="addControlClose"><img src="icons/close_icon.svg" class="icon" alt="Close" /></button>
+    </div>
+    <div class="overlay-content">
+      <h2>Add Button</h2>
+      <div id="noConsoleMessage" style="display: none; color: red; margin-bottom: 15px;">
+        Please select a console in the skin settings before adding buttons.
+      </div>
+      <div id="buttonOptions">
+        <label for="buttonType">Button Type</label>
+        <select id="buttonType">
+          <option value="">Select a button type</option>
+        </select>
+      </div>
+      <div class="ButtonOptionsContainer">
+        <div class="ButtonPositionContainer">
+          <div id="ButtonPositionX" class="buttonInput">
+            <label for="xPosition">X Position</label>
+            <input type="number" id="xPosition" value="0" />
+          </div>
+          <div id="ButtonPositionY" class="buttonInput">
+            <label for="yPosition">Y Position</label>
+            <input type="number" id="yPosition" value="0" />
+          </div>
         </div>
+        <div class="ButtonSizeContainer">
+
+          <div id="buttonInputsTop" class="buttonInput">
+            <label for="extendedEdgeTop">Extended Edge Top</label>
+            <input type="number" id="extendedEdgeTop" value="0" />
+          </div>
+          <div id="buttonInputsMiddle">
+            <div id="ButtonExtendedEdgesLeftContainer" class="buttonInput">
+              <label for="extendedEdgeLeft">Extended Edge Left</label>
+              <input type="number" id="extendedEdgeLeft" value="0" />
+            </div>
+            <div id="ButtonWidth" class="buttonInput">
+              <label for="controlWidth">Width</label>
+              <input type="number" id="controlWidth" value="50" />
+            </div>
+            <div id="ButtonHeight" class="buttonInput">
+              <label for="controlHeight">Height</label>
+              <input type="number" id="controlHeight" value="50" />
+            </div>
+            <div id="ButtonExtendedEdgesRightContainer" class="buttonInput  ">
+              <label for="extendedEdgeRight">Extended Edge Right</label>
+              <input type="number" id="extendedEdgeRight" value="0" />
+            </div>
+          </div>
+          <div id="buttonInputsBottom " class="buttonInput">
+            <label for="extendedEdgeBottom">Extended Edge Bottom</label>
+            <input type="number" id="extendedEdgeBottom" value="0" />
+          </div>
+        </div>
+      
+      <button id="confirmAddControl" class="confirm-button">Confirm</button>
     </div>
   </div>
 
-<!-- Work area container -->
-<div id="workArea">
-  <!-- Screen representation with red border -->
-  <div id="screenRepresentation" style="border: 2px solid red; display: flex; justify-content: center; align-items: center;">
-    <div id="screenMessage" style="font-size: 24px; color: #666;">Select a phone size to get started</div>
-  </div>
-  <!-- Logical dimensions display -->
-  <div id="logicalDimensions" style="margin-top: 10px; text-align: center; display: none;">
-    <p><strong>Model: <span id="logicalModelDisplay"></span></strong></p>
-    <p>Logical Width: <span id="logicalWidthDisplay"></span>px</p>
-    <p>Logical Height: <span id="logicalHeightDisplay"></span>px</p>
-  </div>
-  <!-- Console selection information -->
-  <div id="consoleInfo" style="margin-top: 15px; text-align: center; display: none;">
-    <div style="display: flex; align-items: center; justify-content: center;">
-      <img id="consoleIcon" src="" alt="Console Icon" style="height: 32px; margin-right: 10px;">
-      <p><strong>Console: <span id="consoleNameDisplay">None selected</span></strong></p>
-    </div>
-  </div>
+ 
+  
 
-  <script>
-    // Update this script block in your existing JavaScript
-    document.getElementById('gameTypeIdentifier').addEventListener('change', function() {
-      const consoleInfo = document.getElementById('consoleInfo');
-      const consoleIcon = document.getElementById('consoleIcon');
-      const consoleNameDisplay = document.getElementById('consoleNameDisplay');
-      
-      if (this.value) {
-        // Get console info from selected option
-        const consoleName = this.options[this.selectedIndex].text;
-        
-        // Map game type identifier to icon file
-        const consoleType = this.value.split('.').pop();
-        const iconMap = {
-          'gbc': 'gbc.png',
-          'gba': 'gba.png',
-          'ds': 'ds.png',
-          'nes': 'nes.png',
-          'snes': 'snes.png',
-          'n64': 'n64.png',
-          'genesis': 'genesis.png'
-        };
-        
-        const iconFile = iconMap[consoleType] || 'default.svg';
-        
-        // Update console info display
-        consoleIcon.src = `icons/consoles/${iconFile}`;
-        consoleNameDisplay.textContent = consoleName;
-        consoleInfo.style.display = 'block';
-      } else {
-        consoleInfo.style.display = 'none';
-      }
-    });
-  </script>
-</div>
-
-<!-- Floating Add Button -->
-<div id="addButtonFloating" class="disabled">
-  <img src="icons/plus_icon.svg" class="icon" alt="Add Button" />
-</div>
-
-<!-- Add Control Overlay -->
-<div class="overlay" id="addControlOverlay">
-  <div class="overlay-context-menu" id="addControlMenu">
-    <button id="addControlClose"><img src="icons/close_icon.svg" class="icon" alt="Close" /></button>
-  </div>
-  <div class="overlay-content">
-    <h2>Add Button</h2>
-    
-    <!-- Message for when no console is selected -->
-    <div id="noConsoleMessage" style="display: none; color: red; margin-bottom: 15px;">
-      Please select a console in the skin settings before adding buttons.
-    </div>
-
-    <div id="buttonOptions">
-      <label for="buttonType">Button Type</label>
-      <select id="buttonType">
-        <!-- Options will be populated based on selected console -->
-      </select>
-    </div>
-    
-    <!-- Common control properties -->
-    <div id="controlProperties">
-      <label for="xPosition">X Position</label>
-      <input type="number" id="xPosition" value="0" />
-      
-      <label for="yPosition">Y Position</label>
-      <input type="number" id="yPosition" value="0" />
-      
-      <label for="controlWidth">Width</label>
-      <input type="number" id="controlWidth" value="50" />
-      
-      <label for="controlHeight">Height</label>
-      <input type="number" id="controlHeight" value="50" />
-    </div>
-    
-    <button id="confirmAddControl" class="confirm-button">Confirm</button>
-  </div>
-</div>
-
-<!-- Embedded iPhone sizes data as fallback -->
-<script id="iphoneSizesData" type="application/json">
-[
-  {
-    "model": "iPhone 16 Pro Max",
-    "logicalWidth": 440,
-    "logicalHeight": 956,
-    "physicalWidth": 1320,
-    "physicalHeight": 2868,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone 16 Pro",
-    "logicalWidth": 402,
-    "logicalHeight": 874,
-    "physicalWidth": 1206,
-    "physicalHeight": 2622,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone 16 Plus",
-    "logicalWidth": 430,
-    "logicalHeight": 932,
-    "physicalWidth": 1290,
-    "physicalHeight": 2796,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone 16",
-    "logicalWidth": 393,
-    "logicalHeight": 852,
-    "physicalWidth": 1179,
-    "physicalHeight": 2556,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone 15 Pro Max",
-    "logicalWidth": 430,
-    "logicalHeight": 932,
-    "physicalWidth": 1290,
-    "physicalHeight": 2796,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone 15 Pro",
-    "logicalWidth": 393,
-    "logicalHeight": 852,
-    "physicalWidth": 1179,
-    "physicalHeight": 2556,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone 15 Plus",
-    "logicalWidth": 430,
-    "logicalHeight": 932,
-    "physicalWidth": 1290,
-    "physicalHeight": 2796,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone 15",
-    "logicalWidth": 393,
-    "logicalHeight": 852,
-    "physicalWidth": 1179,
-    "physicalHeight": 2556,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone 14 Plus",
-    "logicalWidth": 428,
-    "logicalHeight": 926,
-    "physicalWidth": 1284,
-    "physicalHeight": 2778,
-    "ppi": 458
-  },
-  {
-    "model": "iPhone 14 Pro Max",
-    "logicalWidth": 430,
-    "logicalHeight": 932,
-    "physicalWidth": 1290,
-    "physicalHeight": 2796,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone 14 Pro",
-    "logicalWidth": 393,
-    "logicalHeight": 852,
-    "physicalWidth": 1179,
-    "physicalHeight": 2556,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone 14",
-    "logicalWidth": 390,
-    "logicalHeight": 844,
-    "physicalWidth": 1170,
-    "physicalHeight": 2532,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone SE 3rd gen",
-    "logicalWidth": 375,
-    "logicalHeight": 667,
-    "physicalWidth": 750,
-    "physicalHeight": 1334,
-    "ppi": 326
-  },
-  {
-    "model": "iPhone 13 Pro Max",
-    "logicalWidth": 428,
-    "logicalHeight": 926,
-    "physicalWidth": 1284,
-    "physicalHeight": 2778,
-    "ppi": 458
-  },
-  {
-    "model": "iPhone 13 Pro",
-    "logicalWidth": 390,
-    "logicalHeight": 844,
-    "physicalWidth": 1170,
-    "physicalHeight": 2532,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone 13 mini",
-    "logicalWidth": 375,
-    "logicalHeight": 812,
-    "physicalWidth": 1080,
-    "physicalHeight": 2340,
-    "ppi": 476
-  },
-  {
-    "model": "iPhone 13",
-    "logicalWidth": 390,
-    "logicalHeight": 844,
-    "physicalWidth": 1170,
-    "physicalHeight": 2532,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone 12 Pro Max",
-    "logicalWidth": 428,
-    "logicalHeight": 926,
-    "physicalWidth": 1284,
-    "physicalHeight": 2778,
-    "ppi": 458
-  },
-  {
-    "model": "iPhone 12 Pro",
-    "logicalWidth": 390,
-    "logicalHeight": 844,
-    "physicalWidth": 1170,
-    "physicalHeight": 2532,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone 12 mini",
-    "logicalWidth": 375,
-    "logicalHeight": 812,
-    "physicalWidth": 1080,
-    "physicalHeight": 2340,
-    "ppi": 476
-  },
-  {
-    "model": "iPhone 12",
-    "logicalWidth": 390,
-    "logicalHeight": 844,
-    "physicalWidth": 1170,
-    "physicalHeight": 2532,
-    "ppi": 460
-  },
-  {
-    "model": "iPhone SE 2nd gen",
-    "logicalWidth": 375,
-    "logicalHeight": 667,
-    "physicalWidth": 750,
-    "physicalHeight": 1334,
-    "ppi": 326
-  },
-  {
-    "model": "iPhone 11 Pro Max",
-    "logicalWidth": 414,
-    "logicalHeight": 896,
-    "physicalWidth": 1242,
-    "physicalHeight": 2688,
-    "ppi": 458
-  },
-  {
-    "model": "iPhone 11 Pro",
-    "logicalWidth": 375,
-    "logicalHeight": 812,
-    "physicalWidth": 1125,
-    "physicalHeight": 2436,
-    "ppi": 458
-  },
-  {
-    "model": "iPhone 11",
-    "logicalWidth": 414,
-    "logicalHeight": 896,
-    "physicalWidth": 828,
-    "physicalHeight": 1792,
-    "ppi": 326
-  },
-  {
-    "model": "iPhone XR",
-    "logicalWidth": 414,
-    "logicalHeight": 896,
-    "physicalWidth": 828,
-    "physicalHeight": 1792,
-    "ppi": 326
-  },
-  {
-    "model": "iPhone XS Max",
-    "logicalWidth": 414,
-    "logicalHeight": 896,
-    "physicalWidth": 1242,
-    "physicalHeight": 2688,
-    "ppi": 458
-  },
-  {
-    "model": "iPhone XS",
-    "logicalWidth": 375,
-    "logicalHeight": 812,
-    "physicalWidth": 1125,
-    "physicalHeight": 2436,
-    "ppi": 458
-  },
-  {
-    "model": "iPhone X",
-    "logicalWidth": 375,
-    "logicalHeight": 812,
-    "physicalWidth": 1125,
-    "physicalHeight": 2436,
-    "ppi": 458
-  }
-]
-  </script>
-
-  <!-- Embedded game type identifiers data as fallback -->
-  <script id="gameTypeIdentifiersData" type="application/json">
-[
-  {
-    "console": "GameBoy (Color)",
-    "gameTypeIdentifier": "com.rileytestut.delta.game.gbc"
-  },
-  {
-    "console": "GameBoy Advance",
-    "gameTypeIdentifier": "com.rileytestut.delta.game.gba"
-  },
-  {
-    "console": "Nintendo DS",
-    "gameTypeIdentifier": "com.rileytestut.delta.game.ds"
-  },
-  {
-    "console": "Nintendo Entertainment System",
-    "gameTypeIdentifier": "com.rileytestut.delta.game.nes"
-  },
-  {
-    "console": "Super Nintendo Entertainment System",
-    "gameTypeIdentifier": "com.rileytestut.delta.game.snes"
-  },
-  {
-    "console": "Nintendo 64",
-    "gameTypeIdentifier": "com.rileytestut.delta.game.n64"
-  },
-  {
-    "console": "Sega Genesis (Beta)",
-    "gameTypeIdentifier": "com.rileytestut.delta.game.genesis"
-  }
-]
-  </script>
-
-  <script>
-    // Data for iPhone sizes and game type identifiers
-    let iphoneSizes = [];
-    let gameTypeIdentifiers = [];
-
-    // Function to load JSON data
-    async function loadJsonData() {
-      // Load config first
-      await loadConfig();
-      
-      try {
-        // Try to load iPhone sizes data from file
-        try {
-          const iphoneSizesResponse = await fetch('Reference/iphone-sizes.json');
-          iphoneSizes = await iphoneSizesResponse.json();
-        } catch (error) {
-          // Fallback to embedded data
-          console.warn('Falling back to embedded iPhone sizes data');
-          const iphoneSizesJson = document.getElementById('iphoneSizesData').textContent;
-          iphoneSizes = JSON.parse(iphoneSizesJson);
-        }
-        
-        // Try to load game type identifiers data from file
-        try {
-          const gameTypeIdentifiersResponse = await fetch('Reference/gameTypeIdentifiers.json');
-          gameTypeIdentifiers = await gameTypeIdentifiersResponse.json();
-        } catch (error) {
-          // Fallback to embedded data
-          console.warn('Falling back to embedded game type identifiers data');
-          const gameTypeIdentifiersJson = document.getElementById('gameTypeIdentifiersData').textContent;
-          gameTypeIdentifiers = JSON.parse(gameTypeIdentifiersJson);
-        }
-        
-        // Initialize dropdowns after data is loaded
-        populateGameTypeDropdown();
-        populatePhoneModelDropdown();
-      } catch (error) {
-        console.error('Error loading JSON data:', error);
-      }
-    }
-
-    let currentConfig;
-    async function loadConfig() {
-      try {
-        // Load default configuration from file
-        const response = await fetch('Reference/default_config.json');
-        currentConfig = await response.json();
-        localStorage.setItem('currentConfig', JSON.stringify(currentConfig));
-      } catch (error) {
-        console.error('Error loading default configuration:', error);
-        // Set a basic default if file loading fails
-        currentConfig = {
-          name: "",
-          identifier: "",
-          gameTypeIdentifier: null,
-          debug: false,
-          representations: {
-            iphone: {
-              edgeToEdge: {
-                portrait: {
-                  assets: {},
-                  items: [],
-                  mappingSize: {
-                    width: 0,
-                    height: 0
-                  },
-                  extendedEdges: {},
-                  menuInsets: {}
-                }
-              }
-            }
-          }
-        };
-        localStorage.setItem('currentConfig', JSON.stringify(currentConfig));
-      }
-    }
-    // Function to populate the game type dropdown
-    function populateGameTypeDropdown() {
-      const dropdown = document.getElementById('gameTypeIdentifier');
-      
-      // Clear existing options
-      dropdown.innerHTML = '<option value="">Select a console</option>';
-      
-      // Add options from the gameTypeIdentifiers array
-      if (gameTypeIdentifiers.length > 0) {
-        gameTypeIdentifiers.forEach(item => {
-          const option = document.createElement('option');
-          option.value = item.gameTypeIdentifier;
-          option.textContent = item.console;
-          dropdown.appendChild(option);
-        });
-      }
-
-      // Add change event listener
-      dropdown.addEventListener('change', function() {
-        currentConfig.gameTypeIdentifier = this.value;
-        localStorage.setItem('currentConfig', JSON.stringify(currentConfig));
-        
-        // Update button options if the add control overlay is open
-        if (addControlOverlay.style.display === 'flex') {
-          const noConsoleMessage = document.getElementById('noConsoleMessage');
-          const buttonOptions = document.getElementById('buttonOptions');
-          if (!this.value) {
-            noConsoleMessage.style.display = 'block';
-            buttonOptions.style.display = 'none';
-          } else {
-            noConsoleMessage.style.display = 'none';
-            buttonOptions.style.display = 'block';
-            updateButtonOptions(this.value.split('.').pop());
-          }
-        }
-      });
-    }
-
-    // Initialize code content
-    const codeContent = document.getElementById('codeContent');
-    
-    // Initialize the application
-    (async function init() {
-      await loadConfig();
-      await loadJsonData();
-      codeContent.textContent = JSON.stringify(currentConfig, null, 2);
-    })();
-
-    // Menu toggle
-    const toggle = document.getElementById('menuToggle');
-    const menu = document.getElementById('contextMenu');
-    toggle.addEventListener('click', () => {
-      menu.classList.toggle('open');
-    });
-
-    // Close menu button
-    const closeBtn = document.querySelector('#contextMenu button img[alt="Close Menu"]');
-    if (closeBtn) {
-      closeBtn.parentElement.addEventListener('click', () => {
-        menu.classList.remove('open');
-      });
-    }
-    
-    // Floating Add Button click handler
-    const addButtonFloating = document.getElementById('addButtonFloating');
-    const addControlOverlay = document.getElementById('addControlOverlay');
-    
-    addButtonFloating.addEventListener('click', function() {
-      // Only allow click if not disabled
-      if (!this.classList.contains('disabled')) {
-        console.log('Add Button clicked - opening control overlay');
-        // Show the add control overlay
-        addControlOverlay.style.display = 'flex';
-        
-        // Reset form values
-        document.getElementById('xPosition').value = '0';
-        document.getElementById('yPosition').value = '0';
-        document.getElementById('controlWidth').value = '50';
-        document.getElementById('controlHeight').value = '50';
-        
-        // Check if a console is selected and update button options
-        const gameTypeId = currentConfig.gameTypeIdentifier ? currentConfig.gameTypeIdentifier.split('.').pop() : null;
-        const noConsoleMessage = document.getElementById('noConsoleMessage');
-        const buttonOptions = document.getElementById('buttonOptions');
-        
-        if (!gameTypeId) {
-          noConsoleMessage.style.display = 'block';
-          buttonOptions.style.display = 'none';
-        } else {
-          noConsoleMessage.style.display = 'none';
-          buttonOptions.style.display = 'block';
-          updateButtonOptions(gameTypeId);
-        }
-      }
-    });
-    
-    // Load available buttons data
-    let availableButtons = {};
-    async function loadAvailableButtons() {
-      try {
-        const response = await fetch('Reference/available_buttons.json');
-        availableButtons = await response.json();
-      } catch (error) {
-        console.error('Error loading available buttons:', error);
-      }
-    }
-    loadAvailableButtons();
-
-    // Function to update button options based on selected console
-    function updateButtonOptions(gameTypeId) {
-      const buttonType = document.getElementById('buttonType');
-      buttonType.innerHTML = '<option value="">Select a button type</option>'; // Clear existing options
-      
-      if (!gameTypeId || !availableButtons[gameTypeId]) {
-        return;
-      }
-
-      // Common buttons available for all consoles
-      const commonButtons = ['menu', 'quickSave', 'quickLoad', 'fastForward', 'toggleFastForward'];
-      
-      // Add console-specific buttons
-      availableButtons[gameTypeId].forEach(button => {
-        const option = document.createElement('option');
-        option.value = button;
-        option.textContent = button.toUpperCase() + ' Button';
-        buttonType.appendChild(option);
-      });
-
-      // Add common buttons
-      if (availableButtons[gameTypeId].length > 0) {
-        // Add a separator if there are console-specific buttons
-        const separator = document.createElement('option');
-        separator.disabled = true;
-        separator.textContent = '──────────';
-        buttonType.appendChild(separator);
-      }
-      
-      commonButtons.forEach(button => {
-        const option = document.createElement('option');
-        option.value = button;
-        option.textContent = button
-          .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-          .split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
-          .join(' ') + ' Button';
-        buttonType.appendChild(option);
-      });
-    }
-
-    
-    // Add Control overlay close button
-    document.getElementById('addControlClose').addEventListener('click', function() {
-      addControlOverlay.style.display = 'none';
-    });
-    
-    // Confirm Add Control button
-    document.getElementById('confirmAddControl').addEventListener('click', function() {
-      // Check if a button type is selected
-      const buttonTypeSelect = document.getElementById('buttonType');
-      if (!buttonTypeSelect.value) {
-        alert('Please select a button type');
-        return;
-      }
-      
-      // Get control properties
-      const xPosition = parseInt(document.getElementById('xPosition').value) || 0;
-      const yPosition = parseInt(document.getElementById('yPosition').value) || 0;
-      const width = parseInt(document.getElementById('controlWidth').value) || 50;
-      const height = parseInt(document.getElementById('controlHeight').value) || 50;
-      
-      // Create the control element
-      const controlElement = document.createElement('div');
-      controlElement.className = 'control-element';
-      controlElement.style.left = xPosition + 'px';
-      controlElement.style.top = yPosition + 'px';
-      controlElement.style.width = width + 'px';
-      controlElement.style.height = height + 'px';
-      
-      // Set button properties
-      const selectedButtonType = document.getElementById('buttonType').value;
-      controlElement.textContent = selectedButtonType;
-      controlElement.dataset.controlType = 'button';
-      controlElement.dataset.buttonType = selectedButtonType;
-      
-      // Add the control to the screen representation
-      const screenRepresentation = document.getElementById('screenRepresentation');
-      screenRepresentation.appendChild(controlElement);
-      
-      // Close the overlay
-      addControlOverlay.style.display = 'none';
-    });
-
-    // Code overlay
-    const codeBtn = document.querySelector('#contextMenu button img[alt="Code"]').parentElement;
-    codeBtn.addEventListener('click', () => {
-      const overlay = document.getElementById('codeOverlay');
-      codeContent.textContent = JSON.stringify(currentConfig, null, 2);
-      overlay.style.display = 'flex';
-      menu.classList.remove('open');
-    });
-
-    document.getElementById('codeClose').addEventListener('click', () => {
-      document.getElementById('codeOverlay').style.display = 'none';
-    });
-
-    // Gear settings overlay
-    const gearBtn = document.querySelector('#contextMenu button img[alt="Settings"]').parentElement;
-    const gearSettingsOverlay = document.getElementById('gearSettingsOverlay');
-    
-    gearBtn.addEventListener('click', () => {
-      document.getElementById('debugToggle').checked = currentConfig.debug;
-      gearSettingsOverlay.style.display = 'flex';
-      menu.classList.remove('open');
-    });
-
-    // Function to populate the phone model dropdown
-    function populatePhoneModelDropdown() {
-      const dropdown = document.getElementById('phoneModel');
-      
-      // Clear existing options
-      dropdown.innerHTML = '<option value="">Select a phone model</option>';
-      
-      // Add options from the iphoneSizes array
-      if (iphoneSizes.length > 0) {
-        iphoneSizes.forEach(item => {
-          const option = document.createElement('option');
-          option.value = item.model;
-          option.textContent = item.model;
-          dropdown.appendChild(option);
-        });
-
-        // Set iPhone 15 Pro as default selection
-        const defaultPhone = "iPhone 15 Pro";
-        dropdown.value = defaultPhone;
-        
-        // Trigger change event to update the UI
-        const event = new Event('change');
-        dropdown.dispatchEvent(event);
-      }
-    }
-    
-    // Handle phone model selection
-    document.getElementById('phoneModel').addEventListener('change', function() {
-      const selectedModel = this.value;
-      const dimensionsDiv = document.getElementById('phoneDimensions');
-      const logicalDimensionsDiv = document.getElementById('logicalDimensions');
-      const screenRepresentation = document.getElementById('screenRepresentation');
-      const addButtonFloating = document.getElementById('addButtonFloating');
-      
-      if (selectedModel) {
-        // Find the selected phone model data
-        const phoneData = iphoneSizes.find(item => item.model === selectedModel);
-        
-        if (phoneData) {
-          // // Update the dimensions display in gear settings
-          // document.getElementById('logicalWidth').textContent = phoneData.logicalWidth;
-          // document.getElementById('logicalHeight').textContent = phoneData.logicalHeight;
-          // dimensionsDiv.style.display = 'block';
-          
-          // Update the logical dimensions display below screen representation
-          document.getElementById('logicalModelDisplay').textContent = selectedModel;
-          document.getElementById('logicalWidthDisplay').textContent = phoneData.logicalWidth;
-          document.getElementById('logicalHeightDisplay').textContent = phoneData.logicalHeight;
-          logicalDimensionsDiv.style.display = 'block';
-          
-          // Update the screen representation dimensions
-          screenRepresentation.style.width = phoneData.logicalWidth + 'px';
-          screenRepresentation.style.height = phoneData.logicalHeight + 'px';
-          
-          // Hide the message when a phone is selected
-          document.getElementById('screenMessage').style.display = 'none';
-          
-          // Enable the floating Add Button when a phone is selected
-          addButtonFloating.classList.remove('disabled');
-        } else {
-          dimensionsDiv.style.display = 'none';
-          logicalDimensionsDiv.style.display = 'none';
-          // Reset screen representation to full size
-          screenRepresentation.style.width = '100%';
-          screenRepresentation.style.height = '100%';
-          document.getElementById('screenMessage').style.display = 'block';
-          
-          // Disable the floating Add Button when no valid phone is selected
-          addButtonFloating.classList.add('disabled');
-        }
-      } else {
-        dimensionsDiv.style.display = 'none';
-        logicalDimensionsDiv.style.display = 'none';
-        // Reset screen representation to full size
-        screenRepresentation.style.width = '100%';
-        screenRepresentation.style.height = '100%';
-        document.getElementById('screenMessage').style.display = 'block';
-        
-        // Disable the floating Add Button when no phone is selected
-        addButtonFloating.classList.add('disabled');
-      }
-    });
-    
-    document.getElementById('gearSettingsClose').addEventListener('click', () => {
-      gearSettingsOverlay.style.display = 'none';
-    });
-    
-    document.getElementById('debugToggle').addEventListener('change', (e) => {
-      currentConfig.debug = e.target.checked;
-      localStorage.setItem('currentConfig', JSON.stringify(currentConfig));
-      codeContent.textContent = JSON.stringify(currentConfig, null, 2);
-    });
-    
-    // Settings overlay
-    const settingsBtn = document.querySelector('#contextMenu button img[alt="Navigation"]').parentElement;
-    const settingsOverlay = document.getElementById('settingsOverlay');
-    
-    // Open settings
-    settingsBtn.addEventListener('click', () => {
-      document.getElementById('skinName').value = currentConfig.name;
-      document.getElementById('skinIdentifier').value = currentConfig.identifier;
-      document.getElementById('gameTypeIdentifier').value = currentConfig.gameTypeIdentifier;
-      settingsOverlay.style.display = 'flex';
-      menu.classList.remove('open');
-    });
-
-    // Close settings
-    document.getElementById('settingsClose').addEventListener('click', () => {
-      settingsOverlay.style.display = 'none';
-    });
-
-    // Save settings
-    document.getElementById('settingsSave').addEventListener('click', () => {
-      currentConfig.name = document.getElementById('skinName').value;
-      currentConfig.identifier = document.getElementById('skinIdentifier').value;
-      currentConfig.gameTypeIdentifier = document.getElementById('gameTypeIdentifier').value;
-      localStorage.setItem('currentConfig', JSON.stringify(currentConfig));
-      codeContent.textContent = JSON.stringify(currentConfig, null, 2);
-      
-      // Reset the add control overlay if it's open
-      const noConsoleMessage = document.getElementById('noConsoleMessage');
-      const buttonOptions = document.getElementById('buttonOptions');
-      if (addControlOverlay.style.display === 'flex') {
-        if (!currentConfig.gameTypeIdentifier) {
-          noConsoleMessage.style.display = 'block';
-          buttonOptions.style.display = 'none';
-        } else {
-          noConsoleMessage.style.display = 'none';
-          buttonOptions.style.display = 'block';
-          updateButtonOptions(currentConfig.gameTypeIdentifier.split('.').pop());
-        }
-      }
-      
-      settingsOverlay.style.display = 'none';
-    });
-  </script>
+  <!-- Bootstrap application -->
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
