@@ -77,30 +77,40 @@
     </div>
   </div>
 
+  <!-- work area-->
   <div id="workArea">
-    <div id="screenRepresentation" style="border: 2px solid red; display: flex; justify-content: center; align-items: center;">
+    <div id="screenRepresentation" style="border: 1px solid black; display: flex; justify-content: center; align-items: center; background-color:white;">
       <div id="screenMessage" style="font-size: 24px; color: #666;">Select a phone size to get started</div>
     </div>
-    <div id="logicalDimensions" style="margin-top: 10px; text-align: center; display: none;">
-      <p><strong>Model: <span id="logicalModelDisplay"></span></strong></p>
-      <p>Logical Width: <span id="logicalWidthDisplay"></span>px</p>
-      <p>Logical Height: <span id="logicalHeightDisplay"></span>px</p>
-    </div>
-    <div id="consoleInfo" style="margin-top: 15px; text-align: center; display: none;">
-      <div style="display: flex; align-items: center; justify-content: center;">
-        <img id="consoleIcon" src="" alt="Console Icon" style="height: 32px; margin-right: 10px;">
-        <p><strong>Console: <span id="consoleNameDisplay">None selected</span></strong></p>
+    <div id="currentInfo">
+      <div id="consoleInfo" style="text-align: center; display: none;">
+        <div style="display: flex; align-items: center; justify-content: center;">
+          <img id="consoleIcon" src="" alt="Console Icon" style="height: 32px; margin-right: 10px;">
+          <p><strong><span id="consoleNameDisplay">None selected</span></strong></p>
+        </div>
+      </div>
+      <div id="logicalDimensions" style="display: none;">
+        <p><strong><span id="logicalModelDisplay"></span></strong></p>
+        <p>Logical Width: <span id="logicalWidthDisplay"></span>px</p>
+        <p>Logical Height: <span id="logicalHeightDisplay"></span>px</p>
       </div>
     </div>
+    <form class="color-picker"> 
+      <fieldset> 
+        <h4>Editor Theme</h4>
+        <select name="theme" id="theme">
+          <option value="system">System</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </fieldset>
+    </form>
     <div id="addButtonFloating" class="disabled">
       <img src="icons/plus_icon.svg" class="icon" alt="Add Button" />
     </div>
   </div>
 
   <div class="overlay" id="addControlOverlay">
-    <div class="overlay-context-menu" id="addControlMenu">
-      <button id="addControlClose"><img src="icons/close_icon.svg" class="icon" alt="Close" /></button>
-    </div>
     <div class="overlay-content">
       <h2>Add Button</h2>
       <div id="noConsoleMessage" style="display: none; color: red; margin-bottom: 15px;">
@@ -157,7 +167,10 @@
         </div>
       </div>
       
-      <button id="confirmAddControl" class="confirm-button">Confirm</button>
+      <div style="display: flex; gap: 10px;">
+        <button id="confirmAddControl" class="confirm-button">Confirm</button>
+        <button id="cancelAddControl" class="cancel-button">Cancel</button>
+      </div>
     </div>
   </div>
 
@@ -168,13 +181,13 @@
   <div id="controlOptionsPanel" class="control-options-panel hidden">
     <div class="control-options-container">
       <button id="moveButton" class="option-button">
-        <span class="button-icon">↖</span> Move
+       <img src="icons/move_icon.svg" class="icon" alt="Move Control" />
       </button>
       <button id="editButton" class="option-button">
-        <span class="button-icon">✏️</span> Edit
+        <img src="icons/edit_icon.svg" class="icon" alt="Edit Control" />
       </button>
       <button id="deleteButton" class="option-button">
-        <span class="button-icon">🗑️</span> Delete
+        <img src="icons/delete_icon.svg" class="icon" alt="Delete Control" />
       </button>
     </div>
   </div>

@@ -1,13 +1,70 @@
 :root {
-    --white: #ffffff;
-    --blue: #007bff;
-    --background: #f0f0f0;
+  @media (prefers-color-scheme: light) {
+    --theme: light;
+    color-scheme: light;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    --theme: dark;
+    color-scheme: dark;
+  }
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    padding: 0;
+}
+
+:root:has([value="light"]:checked) {
+   --theme: light;
+    color-scheme: light;
+}
+
+:root:has([value="dark"]:checked) {
+  --theme: dark;
+    color-scheme: dark;
+}
+
+:root {
     --button-padding-vertical: 10px;
     --button-padding-horizontal: 20px;
     --button-radius: 5px;
-    --icon-color: #000000;
-    --icon-border: 1px solid #ccc;
     --icon-font-size: 12px;
+}
+
+body {
+    color-scheme: light;
+    --clr-transparent-bg: rgba(255, 255, 255, 0.8);
+    --clr-body-bg: hsl(10, 25%, 95%);
+    --clr-card-bg: hsl(10, 25%, 98%);
+    --clr-btn-bg: hsl(0, 0%, 100%);
+    --clr-text: #232323;
+    --clr-heading: hsl(18, 65%, 48%);
+    --clr-icon-border: 1px solid hsl(173, 50%, 70%);
+    --clr-code-bg: hsl(135, 10%, 8%);
+    --clr-code-border: 1px solid hsl(0, 0%, 80%);
+    --clr-help-text: hsl(0, 0%, 60%);
+    --clr-form-bg: hsl(0, 0%, 95%);
+    --clr-form-text: hsl(0, 0%, 20%);
+    --clr-tooltip-bg: rgba(255, 255, 255, 0.8);
+
+  @container style(--theme: dark) {
+    color-scheme: dark;
+    --clr-transparent-bg: rgba(0, 0, 0, 0.8);
+    --clr-body-bg: hsl(300, 7%, 9%);
+    --clr-card-bg: hsl(0, 0%, 16%);
+    --clr-btn-bg: hsla(0, 0%, 0%, 0.782);
+    --clr-text: #cbd5e1;
+    --clr-heading: hsl(173, 50%, 70%);
+    --clr-icon-color: contrast(0) brightness(2);
+    --clr-icon-border: 1px solid hsl(0, 0%, 100%);
+    --clr-code-bg: hsl(135, 10%, 8%);
+    --clr-code-border: 1px solid hsl(0, 0%, 80%);
+    --clr-help-text: hsl(0, 0%, 60%);
+     --clr-form-bg: hsl(0, 0%, 18%);
+    --clr-form-text: hsl(0, 0%, 91%);
+    --clr-tooltip-bg: rgba(0, 0, 0, 0.546);
+  }
 }
 
 body {
@@ -18,13 +75,15 @@ body {
     flex-direction: column;
     align-items: top;
     justify-content: center;
-    align-items: center;;
+    align-items: center;
     height: 100%;
-    background-color: var(--background);
+    background-color: var(--clr-body-bg);
 }
 
 header {
-    position: relative;
+    position: fixed;
+    top:0;
+    right:0;
     color: var(--white);
     width: 100%;
     text-align: center;
@@ -36,10 +95,11 @@ button {
     margin: 8px;
     font-size: var(--icon-font-size);
     cursor: pointer;
-    background-color: var(--white);
-    color: var(--white);
+    /* background-color: var(--clr-tooltip-bg); */
+    color: var(--clr-text);
     border: none;
     border-radius: var(--button-radius);
+    backdrop-filter: blur(10px);
 }
 
 .icon-button {
@@ -51,14 +111,20 @@ button {
     background: none;
     border: none;
     cursor: pointer;
-    border: var(--icon-border);
-    background-color: var(--white);
+    /* border: var(--icon-border); */
+    /* background-color: var(--clr-tooltip-bg); */
+    backdrop-filter: blur(10px);
 }
 
 .icon {
     width: 16px;
     height: 16px;
-    fill: var(--icon-color);
+    filter: var(--clr-icon-color);
+
+}
+
+#menuToggle {
+    /* border: var(--clr-icon-border); */
 }
 
 .context-menu {
@@ -66,8 +132,8 @@ button {
     top: 5px;
     right: 5px;
     display: none;
-    background: var(--white);
-    border: 1px solid #ccc;
+    background: var(--clr-tooltip-bg);
+    /* border: var(--clr-icon-border); */
     border-radius: 4px;
 }
 
@@ -99,8 +165,8 @@ button {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(47, 47, 47, 0.5);
-    color: var(--white);
+    background: var(--clr-transparent-bg);
+    color: var(--clr-text);
     display: none;
     padding: 6px;
     overflow: auto;
@@ -109,13 +175,15 @@ button {
     align-items: left;
     flex-direction: column;
     z-index:1000;
+    justify-content:center;
+    align-items:center;
 }
 
 .overlay button {
     top: 0;
     right: 0;
     margin:0;
-    background-color: var(--white);
+    background-color: var(--clr-btn-bg);
     border: none;
     border-radius: var(--button-radius);
     padding: 14px 24px;
@@ -123,17 +191,20 @@ button {
 }
 
 #codeContent {
-    background-color: rgb(21, 21, 21);
+    background-color: var(--clr-code-bg);
+    border: var(--clr-code-border);
+    color:white;
     border-radius: var(--button-radius);
     padding: 12px;
     height: -webkit-fill-available;
     overflow-y: scroll;
-    margin-top:5px;;
+    margin-top:5px;
 }
 
 .overlay .overlay-content {
-    background: rgb(21, 21, 21);
-    color: var(--white);
+    background:var(--clr-tooltip-bg);
+    backdrop-filter: blur(10px);
+    color: var(--clr-text);
     max-width: 600px;
     margin-top:5px;
     padding: 20px;
@@ -143,22 +214,24 @@ button {
     flex-direction: column;
     align-items: left;
     text-align: left;
+    border: var(--clr-icon-border);
+    
 }
 
 .help-text {
-    color: #888;
+    color: var(--clr-help-text);
     font-size: 14px;
     margin: 5px 0 15px 0;
 }
 
 .overlay input {
-    background-color: #2a2a2a;
-    color: var(--white);
+    background-color: var(--clr-form-bg);
+    color: var(--clr-form-text);
     border: 1px solid #444;
 }
 
 .overlay h2 {
-    color: var(--white);
+    color: var(--clr-text);
     margin-bottom: 20px;
 }
 
@@ -171,6 +244,10 @@ button {
     font-size:10px;
 }
 
+fieldset {
+    border: none;
+}
+
 .overlay input,
 .overlay select {
     width: 100%;
@@ -181,15 +258,16 @@ button {
 }
 
 .overlay select {
-    background-color: #2a2a2a;
-    color: var(--white);
+    background-color: var(--clr-form-bg);
+    color: var(--clr-text);
     appearance: menulist;
     cursor: pointer;
+    padding-left: 5px;
 }
 
 .overlay select option {
-    background-color: #2a2a2a;
-    color: var(--white);
+    background-color: var(--clr-form-bg);
+    color: var(--clr-text);
 }
 
 #settingsMenu {
@@ -199,11 +277,16 @@ button {
     margin: 0;
 }
 
+#settingsSave, #settingsClose, #gearSettingsClose, #codeClose, #confirmAddControl, #cancelAddControl {
+    border:var(--clr-icon-border)
+}
+
 input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea, input[type="file"] {
      width: 100%; 
      box-sizing: border-box;
      -webkit-box-sizing:border-box;
      -moz-box-sizing: border-box;
+     padding-left: 5px;
 }
 
 .checkbox-container {
@@ -231,7 +314,7 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     justify-content: center;
     width: 100%;
     height: -webkit-fill-available;
-    background-color: var(--background);
+    background-color: var(--clr-background);
 }
 
 #screenRepresentation {
@@ -249,13 +332,28 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background-color: var(--white);
+    background-color: var(--clr-tooltip-bg);
+    /* border: var(--clr-icon-border); */
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 800;
+}
+
+#currentInfo {
+    position:relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: -webkit-fill-available;
+    background-color: var(--clr-background)
+    padding: 20px;
+    box-sizing: border-box;
+    border-radius: var(--button-radius);
+    margin-bottom:32px;
 }
 
 #addButtonFloating.disabled {
@@ -266,8 +364,9 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
 
 .confirm-button {
     margin-top: 20px;
-    background-color: var(--white) !important;
-    color: black !important;
+    background-color: var(--clr-btn-bg)
+    color: var(--clr-text);
+    border: var(--clr-icon-border);
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
@@ -284,6 +383,13 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     font-weight: bold;
     color: #fff;
     box-sizing:border-box;
+    font-size:12px;
+}
+
+.control-element span {
+    display:inline-block;
+    background-color: rgba(0,0,0,.5);
+    padding: 2px 4px;
 }
 
 #addButtonFloating .icon {
@@ -321,13 +427,11 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     bottom: 0;
     left: 0;
     width: 100%;
+    padding: 10px;
     display: flex;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 1001; /* Higher than other elements */
-    transition: transform 0.3s ease;
-    transform: translateY(0);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    align-items: center;
+    z-index: 1000; /* Ensure it is above other elements */
 }
 
 .control-options-container {
@@ -336,6 +440,11 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     gap: 20px;
     padding: 0;
     margin: 0;
+    border: 1px solid #ccc;
+    border-radius:var(--button-radius);
+    background-color: var(--clr-tooltip-bg);
+    backdrop-filter: blur(10px);
+    
 }
 
 .control-options-panel.hidden {
@@ -397,4 +506,37 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     font-size: 12px;
     font-weight: bold;
     pointer-events: none;
+}
+
+#logicalDimensions {
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap:wrap;
+    width:100%;
+}
+
+#logicalDimensions p {
+    display:block;
+    background-color:var(--clr-card-bg);
+    text-align:center;
+    color: var(--clr-text);
+    padding:8px 10px;
+    border-radius:20px;
+    font-size:12px;
+}
+
+.color-picker fieldset {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0; 
+    gap:12px;
+}
+
+.color-picker {
+    margin-bottom:32px;
 }

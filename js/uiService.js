@@ -41,6 +41,7 @@ class UIService {
       typeSelect: document.getElementById('buttonType'),
       closeBtn: document.getElementById('addControlClose'),
       confirmBtn: document.getElementById('confirmAddControl'),
+      cancelBtn: document.getElementById('cancelAddControl'),
       xInput: document.getElementById('xPosition'),
       yInput: document.getElementById('yPosition'),
       widthInput: document.getElementById('controlWidth'),
@@ -97,7 +98,8 @@ class UIService {
     this.screenOrientation.addEventListener('change', () => this.onOrientationChange());
     this.gameSelect.addEventListener('change', () => this.onGameTypeChange());
     this.addButton.addEventListener('click', () => this.toggleAddOverlay());
-    this.buttonOverlay.closeBtn.addEventListener('click', () => this.overlays.addControl.style.display = 'none');
+    // this.buttonOverlay.closeBtn.addEventListener('click', () => this.overlays.addControl.style.display = 'none');
+    this.buttonOverlay.cancelBtn.addEventListener('click', () => this.overlays.addControl.style.display = 'none');
     // Only one event listener for confirmBtn, handles both add and update
     this.buttonOverlay.confirmBtn.addEventListener('click', () => {
       if (this.isEditing && this.editingControlId) {
@@ -265,7 +267,7 @@ class UIService {
       this.screen.style.width = w + 'px';
       this.screen.style.height = h + 'px';
       this.screenMessage.style.display = 'none';
-      this.logicalDisplay.container.style.display = 'block';
+      this.logicalDisplay.container.style.display = 'flex';
       this.logicalDisplay.model.textContent = model;
       this.logicalDisplay.width.textContent = w;
       this.logicalDisplay.height.textContent = h;
@@ -360,7 +362,7 @@ class UIService {
     const el = document.createElement('div');
     el.className = 'control-element';
     el.style.cssText = `position:absolute;left:${left}px;top:${top}px;width:${w}px;height:${h}px`;
-    el.textContent = type;
+    el.innerHTML = `<span>${type}</span>`;
     el.dataset.extendedEdges = JSON.stringify({ top, bottom, left, right });
 
     wrapper.append(outline, el);
@@ -499,29 +501,29 @@ class UIService {
     // Add mousedown event listener to the control
     this.selectedControl.addEventListener('mousedown', onMouseDown);
     
-    // Show message to user
-    const message = document.createElement('div');
-    message.className = 'move-message';
-    message.textContent = 'Click and drag to move the button';
-    message.style.position = 'absolute';
-    message.style.top = '-30px';
-    message.style.left = '0';
-    message.style.width = '100%';
-    message.style.textAlign = 'center';
-    message.style.color = '#fff';
-    message.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    message.style.padding = '5px';
-    message.style.borderRadius = '3px';
-    message.style.zIndex = '1000';
+    // // Show message to user
+    // const message = document.createElement('div');
+    // message.className = 'move-message';
+    // message.textContent = 'Click and drag to move the button';
+    // message.style.position = 'absolute';
+    // message.style.top = '-30px';
+    // message.style.left = '0';
+    // message.style.width = '100%';
+    // message.style.textAlign = 'center';
+    // message.style.color = '#fff';
+    // message.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    // message.style.padding = '5px';
+    // message.style.borderRadius = '3px';
+    // message.style.zIndex = '1000';
     
-    this.selectedControl.appendChild(message);
+    // this.selectedControl.appendChild(message);
     
-    // Remove message after 3 seconds
-    setTimeout(() => {
-      if (message.parentNode) {
-        message.parentNode.removeChild(message);
-      }
-    }, 3000);
+    // // Remove message after 3 seconds
+    // setTimeout(() => {
+    //   if (message.parentNode) {
+    //     message.parentNode.removeChild(message);
+    //   }
+    // }, 3000);
   }
   
   updateControlPosition() {
@@ -636,7 +638,7 @@ class UIService {
     
     // Update the control element
     const controlElement = control.querySelector('.control-element');
-    controlElement.textContent = type;
+    controlElement.innerHTML = `<span>${type}</span>`;
     controlElement.style.width = `${w}px`;
     controlElement.style.height = `${h}px`;
     controlElement.style.left = `${left}px`;
