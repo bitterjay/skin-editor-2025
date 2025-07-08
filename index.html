@@ -36,6 +36,11 @@
       <select id="phoneModel">
         <option value="">Select a phone model</option>
       </select>
+      <label for="screenOrientation">Screen Orientation</label>
+      <select id="screenOrientation">
+        <option value="portrait">Portrait</option>
+        <option value="landscape">Landscape</option>
+      </select>
     </div>
   </div>
 
@@ -107,6 +112,10 @@
           <option value="">Select a button type</option>
         </select>
       </div>
+      <div id="thumbstickOptions" style="display: none; margin-top: 10px;">
+        <label for="thumbstickImage">Thumbstick Image</label>
+        <input type="file" id="thumbstickImage" accept="image/png" />
+      </div>
       <div class="ButtonOptionsContainer">
         <div class="ButtonPositionContainer">
           <div id="ButtonPositionX" class="buttonInput">
@@ -122,12 +131,12 @@
 
           <div id="buttonInputsTop" class="buttonInput">
             <label for="extendedEdgeTop">Extended Edge Top</label>
-            <input type="number" id="extendedEdgeTop" value="0" />
+            <input type="number" id="extendedEdgeTop" value="5" />
           </div>
           <div id="buttonInputsMiddle">
             <div id="ButtonExtendedEdgesLeftContainer" class="buttonInput">
               <label for="extendedEdgeLeft">Extended Edge Left</label>
-              <input type="number" id="extendedEdgeLeft" value="0" />
+              <input type="number" id="extendedEdgeLeft" value="5" />
             </div>
             <div id="ButtonWidth" class="buttonInput">
               <label for="controlWidth">Width</label>
@@ -139,12 +148,12 @@
             </div>
             <div id="ButtonExtendedEdgesRightContainer" class="buttonInput  ">
               <label for="extendedEdgeRight">Extended Edge Right</label>
-              <input type="number" id="extendedEdgeRight" value="0" />
+              <input type="number" id="extendedEdgeRight" value="5" />
             </div>
           </div>
           <div id="buttonInputsBottom " class="buttonInput">
             <label for="extendedEdgeBottom">Extended Edge Bottom</label>
-            <input type="number" id="extendedEdgeBottom" value="0" />
+            <input type="number" id="extendedEdgeBottom" value="5" />
           </div>
         </div>
       

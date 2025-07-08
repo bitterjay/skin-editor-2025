@@ -19,6 +19,7 @@ class UIService {
     };
     this.codeContent = document.getElementById('codeContent');
     this.phoneSelect = document.getElementById('phoneModel');
+    this.screenOrientation = document.getElementById('screenOrientation');
     this.gameSelect = document.getElementById('gameTypeIdentifier');
     this.consoleInfo = document.getElementById('consoleInfo');
     this.consoleIcon = document.getElementById('consoleIcon');
@@ -49,6 +50,8 @@ class UIService {
       extendedEdgeLeftInput: document.getElementById('extendedEdgeLeft'),
       extendedEdgeRightInput: document.getElementById('extendedEdgeRight')
     };
+    this.buttonOverlay.thumbstickOptions = document.getElementById('thumbstickOptions');
+    this.buttonOverlay.thumbstickImage = document.getElementById('thumbstickImage');
     this.settingsFields = {
       name: document.getElementById('skinName'),
       identifier: document.getElementById('skinIdentifier'),
@@ -98,10 +101,19 @@ class UIService {
 
   bindGlobalEvents() {
     this.phoneSelect.addEventListener('change', () => this.onPhoneChange());
+    this.screenOrientation.addEventListener('change', () => this.onOrientationChange());
     this.gameSelect.addEventListener('change', () => this.onGameTypeChange());
     this.addButton.addEventListener('click', () => this.toggleAddOverlay());
     this.buttonOverlay.closeBtn.addEventListener('click', () => this.overlays.addControl.style.display = 'none');
     this.buttonOverlay.confirmBtn.addEventListener('click', () => this.onAddControl());
+    // show extra thumbstick fields if thumbstick selected
+    this.buttonOverlay.typeSelect.addEventListener('change', () => {
+      if (this.buttonOverlay.typeSelect.value === 'thumbstick') {
+        this.buttonOverlay.thumbstickOptions.style.display = 'block';
+      } else {
+        this.buttonOverlay.thumbstickOptions.style.display = 'none';
+      }
+    });
     this.settingsFields.saveBtn.addEventListener('click', () => this.onSaveSettings());
     this.settingsFields.closeBtn.addEventListener('click', () => this.overlays.settings.style.display = 'none');
     this.debugToggle.addEventListener('change', () => {
@@ -127,14 +139,21 @@ class UIService {
     const model = this.phoneSelect.value;
     const data = this.iphoneSizes.find(p => p.model === model);
     if (data) {
-      this.screen.style.width = data.logicalWidth + 'px';
-      this.screen.style.height = data.logicalHeight + 'px';
+      const orientation = this.screenOrientation.value;
+      let w = data.logicalWidth;
+      let h = data.logicalHeight;
+      if (orientation === 'landscape') [w, h] = [h, w];
+      this.screen.style.width = w + 'px';
+      this.screen.style.height = h + 'px';
       this.screenMessage.style.display = 'none';
       this.logicalDisplay.container.style.display = 'block';
       this.logicalDisplay.model.textContent = model;
-      this.logicalDisplay.width.textContent = data.logicalWidth;
-      this.logicalDisplay.height.textContent = data.logicalHeight;
+      this.logicalDisplay.width.textContent = w;
+      this.logicalDisplay.height.textContent = h;
       this.addButton.classList.remove('disabled');
+      const cfg = getConfig();
+      cfg.representations.iphone.edgeToEdge.portrait.mappingSize = { width: w, height: h };
+      updateConfig({ representations: cfg.representations });
     } else {
       this.resetScreen();
     }
@@ -200,16 +219,67 @@ class UIService {
     const bottom = +this.buttonOverlay.extendedEdgeBottomInput.value;
     const left = +this.buttonOverlay.extendedEdgeLeftInput.value;
     const right = +this.buttonOverlay.extendedEdgeRightInput.value;
+    // wrap control and outline in a container for this type instance
+    const count = document.querySelectorAll(`#screenRepresentation div[data-type="${type}"]`).length + 1;
+    const wrapper = document.createElement('div');
+    wrapper.id = `${type}-${count}`;
+    wrapper.dataset.instance = count;
+    wrapper.dataset.type = type;
+    wrapper.classList.add('button-representation');
     const el = document.createElement('div');
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = `${x - left}px`;
+    wrapper.style.top = `${y - top}px`;
+    wrapper.style.width = `${w + left + right}px`;
+    wrapper.style.height = `${h + top + bottom}px`;
+    // create outline
+    const outline = document.createElement('div');
+    outline.className = 'control-outline';
+    outline.style.cssText = `position:absolute;inset:0;border:2px solid rgba(255,0,0,0.4);`;
+    // configure control element
     el.className = 'control-element';
-    el.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
+    el.style.cssText = `position:absolute;left:${left}px;top:${top}px;width:${w}px;height:${h}px`;
     el.dataset.extendedEdges = JSON.stringify({ top, bottom, left, right });
     el.textContent = type;
-    document.getElementById('screenRepresentation').appendChild(el);
+    // assemble
+    wrapper.appendChild(outline);
+    wrapper.appendChild(el);
+    document.getElementById('screenRepresentation').appendChild(wrapper);
     const cfg = getConfig();
     const portrait = cfg.representations.iphone.edgeToEdge.portrait;
-    portrait.items.push({ type, x, y, width: w, height: h, extendedEdges: { top, bottom, left, right } });
+    if (type !== 'dpad' && type !== 'thumbstick') {
+      portrait.items.push({
+        inputs: [type],
+        frame: { x, y, width: w, height: h },
+        extendedEdges: { top, bottom, left, right }
+      });
+    } else if (type === 'thumbstick') {
+      const file = this.buttonOverlay.thumbstickImage.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        el.style.backgroundImage = `url(${dataUrl})`;
+        el.style.backgroundSize = `${w}px ${h}px`;
+        el.style.backgroundRepeat = 'no-repeat';
+        portrait.items.unshift({
+          thumbstick: { name: file.name, data: dataUrl, width: w, height: h },
+          inputs: {
+            up: 'analogStickUp',
+            down: 'analogStickDown',
+            left: 'analogStickLeft',
+            right: 'analogStickRight'
+          },
+          frame: { x, y, width: w, height: h },
+          extendedEdges: { top, bottom, left, right }
+        });
+        updateConfig({ representations: cfg.representations });
+      };
+      if (file) reader.readAsDataURL(file);
+    } else {
+      portrait.items.push({ type, x, y, width: w, height: h, extendedEdges: { top, bottom, left, right } });
+    }
     updateConfig({ representations: cfg.representations });
+    this.buttonOverlay.thumbstickOptions.style.display = 'none';
     this.overlays.addControl.style.display = 'none';
   }
 
@@ -240,7 +310,17 @@ class UIService {
 
 
   renderCode() {
-    this.codeContent.textContent = JSON.stringify(getConfig(),null,2);
+    const cfg = getConfig();
+    const exportCfg = JSON.parse(JSON.stringify(cfg));
+    const portrait = exportCfg.representations?.iphone?.edgeToEdge?.portrait;
+    if (portrait && Array.isArray(portrait.items)) {
+      portrait.items.forEach(item => {
+            if (item.thumbstick && item.thumbstick.name) {
+              delete item.thumbstick.data;
+            }
+      });
+    }
+    this.codeContent.textContent = JSON.stringify(exportCfg,null,2);
   }
 
   resetScreen() {
@@ -249,6 +329,24 @@ class UIService {
     this.screenMessage.style.display = 'block';
     this.logicalDisplay.container.style.display = 'none';
     this.addButton.classList.add('disabled');
+  }
+
+  onOrientationChange() {
+    const orientation = this.screenOrientation.value;
+    const model = this.phoneSelect.value;
+    const data = this.iphoneSizes.find(p => p.model === model);
+    if (data) {
+      let w = data.logicalWidth;
+      let h = data.logicalHeight;
+      if (orientation === 'landscape') [w, h] = [h, w];
+      this.screen.style.width = w + 'px';
+      this.screen.style.height = h + 'px';
+      this.logicalDisplay.width.textContent = w;
+      this.logicalDisplay.height.textContent = h;
+      const cfg = getConfig();
+      cfg.representations.iphone.edgeToEdge.portrait.mappingSize = { width: w, height: h };
+      updateConfig({ representations: cfg.representations });
+    }
   }
 
   renderConfig() {

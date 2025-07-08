@@ -1,7 +1,7 @@
 {
   "name": "PlayCase Default Skin",
   "identifier": "com.playcase.default.skin",
-  "gameTypeIdentifier": "com.rileytestut.delta.game.gba",
+  "gameTypeIdentifier": "com.rileytestut.delta.game.n64",
   "debug": false,
   "representations": {
     "iphone": {
@@ -13,7 +13,7 @@
             "width": 0,
             "height": 0
           },
-          "extendedEdges": {},
+          "extendedEdges": { "top": 5, "bottom": 5, "left": 5, "right": 5 },
           "menuInsets": {}
         }
       }
