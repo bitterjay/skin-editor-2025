@@ -1,0 +1,74 @@
+{
+  "gbc": [
+    "a",
+    "b", 
+    "select",
+    "start",
+    "dpad",
+    "menu"
+  ],
+  "gba": [
+    "a",
+    "b",
+    "select", 
+    "start",
+    "dpad",
+    "l",
+    "r"
+  ],
+  "nds": [
+    "a",
+    "b",
+    "x",
+    "y",
+    "select",
+    "start", 
+    "dpad",
+    "thumbstick",
+    "l",
+    "r"
+  ],
+  "nes": [
+    "a",
+    "b",
+    "dpad",
+    "select",
+    "start"
+  ],
+  "snes": [
+    "a",
+    "b",
+    "x",
+    "y",
+    "start",
+    "select",
+    "dpad",
+    "l",
+    "r"
+  ],
+  "n64": [
+    "a",
+    "b",
+    "start",
+    "dpad",
+    "cUp",
+    "cDown",
+    "cLeft",
+    "cRight",
+    "thumbstick",
+    "l",
+    "r",
+    "z"
+  ],
+  "sg": [
+    "a",
+    "b",
+    "c",
+    "x",
+    "y",
+    "start",
+    "select",
+    "mode",
+    "thumbstick"
+  ]
+}

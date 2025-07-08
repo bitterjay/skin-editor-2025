@@ -1,8 +1,0 @@
-Console / System,gameTypeIdentifier
-GameBoy (Color),com.rileytestut.delta.game.gbc
-GameBoy Advance,com.rileytestut.delta.game.gba
-Nintendo DS,com.rileytestut.delta.game.ds
-Nintendo Entertainment System,com.rileytestut.delta.game.nes
-Super Nintendo Entertainment System,com.rileytestut.delta.game.snes
-Nintendo 64,com.rileytestut.delta.game.n64
-Sega Genesis (Beta),com.rileytestut.delta.game.genesis

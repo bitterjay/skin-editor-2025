@@ -8,31 +8,6 @@
 </head>
 <body>
 
-  <!-- Embedded default configuration to avoid CORS when loading from file:// -->
-  <script id="defaultConfig" type="application/json">
-{
-  "name": "",
-  "identifier": "",
-  "gameTypeIdentifier": "",
-  "debug": false,
-  "representations": {
-    "iphone": {
-      "edgeToEdge": {
-        "portrait": {
-          "assets": {},
-          "items": [],
-          "mappingSize": {
-            "width": 0,
-            "height": 0
-          },
-          "extendedEdges": {},
-          "menuInsets": {}
-        }
-      }
-    }
-  }
-}
-  </script>
 
   <header>
     <button class="icon-button" id="menuToggle">
@@ -89,6 +64,22 @@
       <select id="gameTypeIdentifier">
         <!-- Options will be populated dynamically -->
       </select>
+      <div id="consoleDetailsDisplay" style="display: none; margin-top: 10px; padding: 8px; background-color: #f5f5f5; border-radius: 4px;">
+        <p><strong>Game Type Identifier:</strong><br><code id="fullGameTypeIdentifier"></code></p>
+      </div>
+      <script>
+        document.getElementById('gameTypeIdentifier').addEventListener('change', function() {
+          const consoleDetailsDisplay = document.getElementById('consoleDetailsDisplay');
+          const fullGameTypeIdentifier = document.getElementById('fullGameTypeIdentifier');
+          
+          if (this.value) {
+        fullGameTypeIdentifier.textContent = this.value;
+        consoleDetailsDisplay.style.display = 'block';
+          } else {
+        consoleDetailsDisplay.style.display = 'none';
+          }
+        });
+      </script>
       <p class="help-text">Select which system the skin belongs to.</p>
       <div class="checkbox-container">
           <input type="checkbox" id="debugToggle" />
@@ -109,6 +100,48 @@
     <p>Logical Width: <span id="logicalWidthDisplay"></span>px</p>
     <p>Logical Height: <span id="logicalHeightDisplay"></span>px</p>
   </div>
+  <!-- Console selection information -->
+  <div id="consoleInfo" style="margin-top: 15px; text-align: center; display: none;">
+    <div style="display: flex; align-items: center; justify-content: center;">
+      <img id="consoleIcon" src="" alt="Console Icon" style="height: 32px; margin-right: 10px;">
+      <p><strong>Console: <span id="consoleNameDisplay">None selected</span></strong></p>
+    </div>
+  </div>
+
+  <script>
+    // Update this script block in your existing JavaScript
+    document.getElementById('gameTypeIdentifier').addEventListener('change', function() {
+      const consoleInfo = document.getElementById('consoleInfo');
+      const consoleIcon = document.getElementById('consoleIcon');
+      const consoleNameDisplay = document.getElementById('consoleNameDisplay');
+      
+      if (this.value) {
+        // Get console info from selected option
+        const consoleName = this.options[this.selectedIndex].text;
+        
+        // Map game type identifier to icon file
+        const consoleType = this.value.split('.').pop();
+        const iconMap = {
+          'gbc': 'gbc.png',
+          'gba': 'gba.png',
+          'ds': 'ds.png',
+          'nes': 'nes.png',
+          'snes': 'snes.png',
+          'n64': 'n64.png',
+          'genesis': 'genesis.png'
+        };
+        
+        const iconFile = iconMap[consoleType] || 'default.svg';
+        
+        // Update console info display
+        consoleIcon.src = `icons/consoles/${iconFile}`;
+        consoleNameDisplay.textContent = consoleName;
+        consoleInfo.style.display = 'block';
+      } else {
+        consoleInfo.style.display = 'none';
+      }
+    });
+  </script>
 </div>
 
 <!-- Floating Add Button -->
@@ -122,22 +155,17 @@
     <button id="addControlClose"><img src="icons/close_icon.svg" class="icon" alt="Close" /></button>
   </div>
   <div class="overlay-content">
-    <h2>Add Control</h2>
+    <h2>Add Button</h2>
     
-    <label for="controlType">Control Type</label>
-    <select id="controlType">
-      <option value="">Select a control type</option>
-      <option value="thumbstick">Thumbstick</option>
-      <option value="dpad">D-Pad</option>
-      <option value="button">Button</option>
-    </select>
-    
-    <!-- Button-specific options (hidden by default) -->
-    <div id="buttonOptions" style="display: none;">
+    <!-- Message for when no console is selected -->
+    <div id="noConsoleMessage" style="display: none; color: red; margin-bottom: 15px;">
+      Please select a console in the skin settings before adding buttons.
+    </div>
+
+    <div id="buttonOptions">
       <label for="buttonType">Button Type</label>
       <select id="buttonType">
-        <option value="A">A Button</option>
-        <option value="B">B Button</option>
+        <!-- Options will be populated based on selected console -->
       </select>
     </div>
     
@@ -439,6 +467,9 @@
 
     // Function to load JSON data
     async function loadJsonData() {
+      // Load config first
+      await loadConfig();
+      
       try {
         // Try to load iPhone sizes data from file
         try {
@@ -471,18 +502,40 @@
     }
 
     let currentConfig;
-    function loadConfig() {
-      const saved = localStorage.getItem('currentConfig');
-      if (saved) {
-        currentConfig = JSON.parse(saved);
-      } else {
-        const defaultJson = document.getElementById('defaultConfig').textContent;
-        currentConfig = JSON.parse(defaultJson);
+    async function loadConfig() {
+      try {
+        // Load default configuration from file
+        const response = await fetch('Reference/default_config.json');
+        currentConfig = await response.json();
+        localStorage.setItem('currentConfig', JSON.stringify(currentConfig));
+      } catch (error) {
+        console.error('Error loading default configuration:', error);
+        // Set a basic default if file loading fails
+        currentConfig = {
+          name: "",
+          identifier: "",
+          gameTypeIdentifier: null,
+          debug: false,
+          representations: {
+            iphone: {
+              edgeToEdge: {
+                portrait: {
+                  assets: {},
+                  items: [],
+                  mappingSize: {
+                    width: 0,
+                    height: 0
+                  },
+                  extendedEdges: {},
+                  menuInsets: {}
+                }
+              }
+            }
+          }
+        };
         localStorage.setItem('currentConfig', JSON.stringify(currentConfig));
       }
     }
-    loadConfig();
-
     // Function to populate the game type dropdown
     function populateGameTypeDropdown() {
       const dropdown = document.getElementById('gameTypeIdentifier');
@@ -499,14 +552,37 @@
           dropdown.appendChild(option);
         });
       }
+
+      // Add change event listener
+      dropdown.addEventListener('change', function() {
+        currentConfig.gameTypeIdentifier = this.value;
+        localStorage.setItem('currentConfig', JSON.stringify(currentConfig));
+        
+        // Update button options if the add control overlay is open
+        if (addControlOverlay.style.display === 'flex') {
+          const noConsoleMessage = document.getElementById('noConsoleMessage');
+          const buttonOptions = document.getElementById('buttonOptions');
+          if (!this.value) {
+            noConsoleMessage.style.display = 'block';
+            buttonOptions.style.display = 'none';
+          } else {
+            noConsoleMessage.style.display = 'none';
+            buttonOptions.style.display = 'block';
+            updateButtonOptions(this.value.split('.').pop());
+          }
+        }
+      });
     }
 
     // Initialize code content
     const codeContent = document.getElementById('codeContent');
-    codeContent.textContent = JSON.stringify(currentConfig, null, 2);
     
-    // Load JSON data when the page loads
-    loadJsonData();
+    // Initialize the application
+    (async function init() {
+      await loadConfig();
+      await loadJsonData();
+      codeContent.textContent = JSON.stringify(currentConfig, null, 2);
+    })();
 
     // Menu toggle
     const toggle = document.getElementById('menuToggle');
@@ -535,25 +611,80 @@
         addControlOverlay.style.display = 'flex';
         
         // Reset form values
-        document.getElementById('controlType').value = '';
-        document.getElementById('buttonOptions').style.display = 'none';
         document.getElementById('xPosition').value = '0';
         document.getElementById('yPosition').value = '0';
         document.getElementById('controlWidth').value = '50';
         document.getElementById('controlHeight').value = '50';
+        
+        // Check if a console is selected and update button options
+        const gameTypeId = currentConfig.gameTypeIdentifier ? currentConfig.gameTypeIdentifier.split('.').pop() : null;
+        const noConsoleMessage = document.getElementById('noConsoleMessage');
+        const buttonOptions = document.getElementById('buttonOptions');
+        
+        if (!gameTypeId) {
+          noConsoleMessage.style.display = 'block';
+          buttonOptions.style.display = 'none';
+        } else {
+          noConsoleMessage.style.display = 'none';
+          buttonOptions.style.display = 'block';
+          updateButtonOptions(gameTypeId);
+        }
       }
     });
     
-    // Control type selection handler
-    document.getElementById('controlType').addEventListener('change', function() {
-      const buttonOptions = document.getElementById('buttonOptions');
-      
-      if (this.value === 'button') {
-        buttonOptions.style.display = 'block';
-      } else {
-        buttonOptions.style.display = 'none';
+    // Load available buttons data
+    let availableButtons = {};
+    async function loadAvailableButtons() {
+      try {
+        const response = await fetch('Reference/available_buttons.json');
+        availableButtons = await response.json();
+      } catch (error) {
+        console.error('Error loading available buttons:', error);
       }
-    });
+    }
+    loadAvailableButtons();
+
+    // Function to update button options based on selected console
+    function updateButtonOptions(gameTypeId) {
+      const buttonType = document.getElementById('buttonType');
+      buttonType.innerHTML = '<option value="">Select a button type</option>'; // Clear existing options
+      
+      if (!gameTypeId || !availableButtons[gameTypeId]) {
+        return;
+      }
+
+      // Common buttons available for all consoles
+      const commonButtons = ['menu', 'quickSave', 'quickLoad', 'fastForward', 'toggleFastForward'];
+      
+      // Add console-specific buttons
+      availableButtons[gameTypeId].forEach(button => {
+        const option = document.createElement('option');
+        option.value = button;
+        option.textContent = button.toUpperCase() + ' Button';
+        buttonType.appendChild(option);
+      });
+
+      // Add common buttons
+      if (availableButtons[gameTypeId].length > 0) {
+        // Add a separator if there are console-specific buttons
+        const separator = document.createElement('option');
+        separator.disabled = true;
+        separator.textContent = '──────────';
+        buttonType.appendChild(separator);
+      }
+      
+      commonButtons.forEach(button => {
+        const option = document.createElement('option');
+        option.value = button;
+        option.textContent = button
+          .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+          .join(' ') + ' Button';
+        buttonType.appendChild(option);
+      });
+    }
+
     
     // Add Control overlay close button
     document.getElementById('addControlClose').addEventListener('click', function() {
@@ -562,10 +693,10 @@
     
     // Confirm Add Control button
     document.getElementById('confirmAddControl').addEventListener('click', function() {
-      const controlType = document.getElementById('controlType').value;
-      
-      if (!controlType) {
-        alert('Please select a control type');
+      // Check if a button type is selected
+      const buttonTypeSelect = document.getElementById('buttonType');
+      if (!buttonTypeSelect.value) {
+        alert('Please select a button type');
         return;
       }
       
@@ -583,19 +714,11 @@
       controlElement.style.width = width + 'px';
       controlElement.style.height = height + 'px';
       
-      // Set control-specific properties
-      if (controlType === 'button') {
-        const buttonType = document.getElementById('buttonType').value;
-        controlElement.textContent = buttonType;
-        controlElement.dataset.controlType = 'button';
-        controlElement.dataset.buttonType = buttonType;
-      } else if (controlType === 'thumbstick') {
-        controlElement.textContent = 'Thumbstick';
-        controlElement.dataset.controlType = 'thumbstick';
-      } else if (controlType === 'dpad') {
-        controlElement.textContent = 'D-Pad';
-        controlElement.dataset.controlType = 'dpad';
-      }
+      // Set button properties
+      const selectedButtonType = document.getElementById('buttonType').value;
+      controlElement.textContent = selectedButtonType;
+      controlElement.dataset.controlType = 'button';
+      controlElement.dataset.buttonType = selectedButtonType;
       
       // Add the control to the screen representation
       const screenRepresentation = document.getElementById('screenRepresentation');
@@ -643,6 +766,14 @@
           option.textContent = item.model;
           dropdown.appendChild(option);
         });
+
+        // Set iPhone 15 Pro as default selection
+        const defaultPhone = "iPhone 15 Pro";
+        dropdown.value = defaultPhone;
+        
+        // Trigger change event to update the UI
+        const event = new Event('change');
+        dropdown.dispatchEvent(event);
       }
     }
     
@@ -738,6 +869,21 @@
       currentConfig.gameTypeIdentifier = document.getElementById('gameTypeIdentifier').value;
       localStorage.setItem('currentConfig', JSON.stringify(currentConfig));
       codeContent.textContent = JSON.stringify(currentConfig, null, 2);
+      
+      // Reset the add control overlay if it's open
+      const noConsoleMessage = document.getElementById('noConsoleMessage');
+      const buttonOptions = document.getElementById('buttonOptions');
+      if (addControlOverlay.style.display === 'flex') {
+        if (!currentConfig.gameTypeIdentifier) {
+          noConsoleMessage.style.display = 'block';
+          buttonOptions.style.display = 'none';
+        } else {
+          noConsoleMessage.style.display = 'none';
+          buttonOptions.style.display = 'block';
+          updateButtonOptions(currentConfig.gameTypeIdentifier.split('.').pop());
+        }
+      }
+      
       settingsOverlay.style.display = 'none';
     });
   </script>

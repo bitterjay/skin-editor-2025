@@ -1,22 +1,12 @@
 {
-  "name": "",
-  "identifier": "",
-  "gameTypeIdentifier": "",
+  "name": "PlayCase Default Skin",
+  "identifier": "com.playcase.default.skin",
+  "gameTypeIdentifier": "com.rileytestut.delta.game.gba",
   "debug": false,
   "representations": {
     "iphone": {
       "edgeToEdge": {
         "portrait": {
-          "assets": {},
-          "items": [],
-          "mappingSize": {
-            "width": 0,
-            "height": 0
-          },
-          "extendedEdges": {},
-          "menuInsets": {}
-        },
-        "landscape": {
           "assets": {},
           "items": [],
           "mappingSize": {
