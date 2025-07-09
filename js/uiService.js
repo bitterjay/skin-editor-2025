@@ -62,8 +62,10 @@ class UIService {
     this.debugToggle = document.getElementById('debugToggle');
     // Control options panel
     this.controlOptionsPanel = document.getElementById('controlOptionsPanel');
+    this.screenOptionsPanel = document.getElementById('screenOptionsPanel');
     this.moveButton = document.getElementById('moveButton');
     this.editButton = document.getElementById('editButton');
+    this.editScreenButton = document.getElementById('editScreenButton');
     this.deleteButton = document.getElementById('deleteButton');
     this.selectedControl = null;
     // Data stores
@@ -82,9 +84,194 @@ class UIService {
     this.bindMenu();
     this.bindGlobalEvents();
     this.bindControlOptions();
+    this.bindAddScreenEvents();
     this.populateDropdowns();
     this.renderCode();
     this.onGameTypeChange();
+  }
+
+
+  bindAddScreenEvents() {
+    this.addScreenButton = document.getElementById('addScreenFloating');
+    this.addScreenOverlay = document.getElementById('addScreenOverlay');
+    this.addScreenForm = document.getElementById('addScreenForm');
+    this.confirmAddScreenBtn = document.getElementById('confirmAddScreen');
+    this.cancelAddScreenBtn = document.getElementById('cancelAddScreen');
+
+    this.isEditingScreen = false;
+    this.editingScreenIndex = null;
+
+    this.addScreenButton.addEventListener('click', () => {
+      this.isEditingScreen = false;
+      this.editingScreenIndex = null;
+      this.addScreenForm.reset();
+      this.addScreenOverlay.style.display = 'flex';
+    });
+
+    this.cancelAddScreenBtn.addEventListener('click', () => {
+      this.isEditingScreen = false;
+      this.editingScreenIndex = null;
+      this.addScreenOverlay.style.display = 'none';
+      this.addScreenForm.reset();
+    });
+
+    this.addScreenForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (this.isEditingScreen) {
+        this.onUpdateScreen();
+      } else {
+        this.onAddScreen();
+      }
+    });
+  }
+
+  onEditScreen() {
+    if (!this.selectedControl) return alert('No screen selected to edit.');
+    if (!this.selectedControl.classList.contains('screen-representation-item')) {
+      return alert('Please select a screen to edit first.');
+    }
+    const screenIndexStr = this.selectedControl.dataset.screenIndex;
+    console.log("screenIndexStr: " + screenIndexStr);
+    if (!screenIndexStr) return alert('Selected screen has no index.');
+    const screenIndex = parseInt(screenIndexStr);
+    console.log("screenIndex: " + screenIndex);
+    if (isNaN(screenIndex) || screenIndex < 0) return alert('Invalid screen selected.');
+
+    const cfg = getConfig();
+    console.log(cfg);
+    if (!cfg.representations?.iphone?.edgeToEdge?.portrait?.screens || !cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex]) return alert('Screen data not found.');
+
+    const screenData = cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex];
+
+    // Populate the add screen form with existing data
+    this.addScreenForm.inputX.value = screenData.inputFrame.x;
+    this.addScreenForm.inputY.value = screenData.inputFrame.y;
+    this.addScreenForm.inputWidth.value = screenData.inputFrame.width;
+    this.addScreenForm.inputHeight.value = screenData.inputFrame.height;
+    this.addScreenForm.outputX.value = screenData.outputFrame.x;
+    this.addScreenForm.outputY.value = screenData.outputFrame.y;
+    this.addScreenForm.outputWidth.value = screenData.outputFrame.width;
+    this.addScreenForm.outputHeight.value = screenData.outputFrame.height;
+
+    this.isEditingScreen = true;
+    this.editingScreenIndex = screenIndex;
+
+    this.addScreenOverlay.style.display = 'flex';
+    this.screenOptionsPanel.classList.add('hidden');
+  }
+
+  onUpdateScreen() {
+    if (this.editingScreenIndex === null) return alert('No screen selected for update.');
+
+    const inputX = +this.addScreenForm.inputX.value;
+    const inputY = +this.addScreenForm.inputY.value;
+    const inputWidth = +this.addScreenForm.inputWidth.value;
+    const inputHeight = +this.addScreenForm.inputHeight.value;
+    const outputX = +this.addScreenForm.outputX.value;
+    const outputY = +this.addScreenForm.outputY.value;
+    const outputWidth = +this.addScreenForm.outputWidth.value;
+    const outputHeight = +this.addScreenForm.outputHeight.value;
+
+    if ([inputX, inputY, inputWidth, inputHeight, outputX, outputY, outputWidth, outputHeight].some(isNaN)) {
+      alert('Please fill in all fields with valid numbers.');
+      return;
+    }
+
+    const cfg = getConfig();
+    if (!cfg.representations?.iphone?.edgeToEdge?.portrait?.screens || !cfg.representations.iphone.edgeToEdge.portrait.screens[this.editingScreenIndex]) {
+      alert('Screen data not found.');
+      return;
+    }
+
+    cfg.representations.iphone.edgeToEdge.portrait.screens[this.editingScreenIndex] = {
+      inputFrame: { x: inputX, y: inputY, width: inputWidth, height: inputHeight },
+      outputFrame: { x: outputX, y: outputY, width: outputWidth, height: outputHeight }
+    };
+
+    updateConfig({ screens: cfg.representations.iphone.edgeToEdge.portrait.screens });
+
+    // Update the DOM element for the screen
+    const screenDivs = this.screen.querySelectorAll('.screen-representation-item');
+    if (screenDivs[this.editingScreenIndex]) {
+      const screenDiv = screenDivs[this.editingScreenIndex];
+      screenDiv.style.left = `${outputX}px`;
+      screenDiv.style.top = `${outputY}px`;
+      screenDiv.style.width = `${outputWidth}px`;
+      screenDiv.style.height = `${outputHeight}px`;
+    }
+
+    this.addScreenOverlay.style.display = 'none';
+    this.addScreenForm.reset();
+    this.isEditingScreen = false;
+    this.editingScreenIndex = null;
+
+    this.renderCode();
+  }
+
+  onAddScreen() {
+    const inputX = +document.getElementById('inputX').value;
+    const inputY = +document.getElementById('inputY').value;
+    const inputWidth = +document.getElementById('inputWidth').value;
+    const inputHeight = +document.getElementById('inputHeight').value;
+    const outputX = +document.getElementById('outputX').value;
+    const outputY = +document.getElementById('outputY').value;
+    const outputWidth = +document.getElementById('outputWidth').value;
+    const outputHeight = +document.getElementById('outputHeight').value;
+
+    if ([inputX, inputY, inputWidth, inputHeight, outputX, outputY, outputWidth, outputHeight].some(isNaN)) {
+      alert('Please fill in all fields with valid numbers.');
+      return;
+    }
+
+    const newScreen = {
+      inputFrame: {
+        x: inputX,
+        y: inputY,
+        width: inputWidth,
+        height: inputHeight
+      },
+      outputFrame: {
+        x: outputX,
+        y: outputY,
+        width: outputWidth,
+        height: outputHeight
+      }
+    };
+
+    const cfg = getConfig();
+    if (!cfg.screens) {
+      cfg.screens = [];
+    }
+    if (!cfg.representations.iphone.edgeToEdge.portrait.screens) {
+      cfg.representations.iphone.edgeToEdge.portrait.screens = [];
+    }
+    cfg.representations.iphone.edgeToEdge.portrait.screens.push(newScreen);
+    updateConfig({ screens: cfg.representations.iphone.edgeToEdge.portrait.screens });
+
+    // Create a new element to represent the screen inside #screenRepresentation
+    const screenDiv = document.createElement('div');
+    screenDiv.classList.add('screen-representation-item');
+    screenDiv.style.position = 'absolute';
+    screenDiv.style.left = `${outputX}px`;
+    screenDiv.style.top = `${outputY}px`;
+    screenDiv.style.width = `${outputWidth}px`;
+    screenDiv.style.height = `${outputHeight}px`;
+    screenDiv.style.border = '2px solid blue';
+    screenDiv.style.backgroundColor = 'rgba(0, 0, 255, 0.1)';
+    // screenDiv.style.pointerEvents = 'none'; // So it doesn't interfere with other UI interactions
+    screenDiv.style.boxSizing = 'border-box';
+
+    // Add data attribute to track screen index
+    const screenIndex = cfg.screens.length; // 1-based index
+    screenDiv.dataset.screenIndex = screenIndex.toString();
+
+    this.screen.appendChild(screenDiv);
+
+    this.addScreenOverlay.style.display = 'none';
+    this.addScreenForm.reset();
+
+    // Optionally, trigger UI update or re-render if needed
+    this.renderCode();
   }
 
   bindMenu() {
@@ -156,42 +343,56 @@ class UIService {
     // Initialize the control options panel
     // Force it to be hidden initially
     this.controlOptionsPanel.classList.add('hidden');
+    this.screenOptionsPanel.classList.add('hidden');
     console.log('Control options panel initialized:', this.controlOptionsPanel);
+    console.log('Screen options panel initialized:', this.screenOptionsPanel);
     
-    // Show panel on control click
+    // Show panel on button control click
     this.screen.addEventListener('click', e => {
       console.log('Screen clicked', e.target);
-      const wrapper = e.target.closest('.button-representation');
-      if (wrapper) {
-        console.log('Button representation clicked', wrapper);
-        this.selectedControl = wrapper;
+      const buttonWrapper = e.target.closest('.button-representation');
+      if (buttonWrapper) {
+        console.log('Button representation clicked', buttonWrapper);
+        this.selectedControl = buttonWrapper;
         
-        // Force panel to be visible and in the DOM
+        // Hide screen options panel if visible
+        this.screenOptionsPanel.classList.add('hidden');
+        
+        // Show control options panel
         this.controlOptionsPanel.style.display = 'flex';
         this.controlOptionsPanel.style.visibility = 'visible';
         this.controlOptionsPanel.style.opacity = '1';
         
-        // Debug the panel state
-        console.log('Panel before showing:', {
-          display: this.controlOptionsPanel.style.display,
-          visibility: this.controlOptionsPanel.style.visibility,
-          opacity: this.controlOptionsPanel.style.opacity,
-          transform: this.controlOptionsPanel.style.transform,
-          classList: [...this.controlOptionsPanel.classList]
-        });
-        
         // Use setTimeout to ensure the display change takes effect before removing 'hidden'
         setTimeout(() => {
           this.controlOptionsPanel.classList.remove('hidden');
-          console.log('Panel after showing (hidden class removed):', {
-            display: this.controlOptionsPanel.style.display,
-            visibility: this.controlOptionsPanel.style.visibility,
-            opacity: this.controlOptionsPanel.style.opacity,
-            transform: this.controlOptionsPanel.style.transform,
-            classList: [...this.controlOptionsPanel.classList]
-          });
         }, 10);
+        return;
       }
+      
+      const screenWrapper = e.target.closest('.screen-representation-item');
+      if (screenWrapper) {
+        console.log('Screen representation item clicked', screenWrapper);
+        this.selectedControl = screenWrapper;
+        
+        // Hide control options panel if visible
+        this.controlOptionsPanel.classList.add('hidden');
+        
+        // Show screen options panel
+        this.screenOptionsPanel.style.display = 'flex';
+        this.screenOptionsPanel.style.visibility = 'visible';
+        this.screenOptionsPanel.style.opacity = '1';
+        
+        // Use setTimeout to ensure the display change takes effect before removing 'hidden'
+        setTimeout(() => {
+          this.screenOptionsPanel.classList.remove('hidden');
+        }, 10);
+        return;
+      }
+      
+      // If click outside both, hide both panels
+      this.controlOptionsPanel.classList.add('hidden');
+      this.screenOptionsPanel.classList.add('hidden');
     });
     
     // Direct event listeners on each button representation
@@ -205,9 +406,11 @@ class UIService {
             console.log('Direct button click', btn);
             this.selectedControl = btn;
             
-            // Force panel to be visible
+            // Hide screen options panel if visible
+            this.screenOptionsPanel.classList.add('hidden');
+            
+            // Show control options panel
             this.controlOptionsPanel.style.display = 'flex';
-            // Use setTimeout to ensure the display change takes effect before removing 'hidden'
             setTimeout(() => {
               this.controlOptionsPanel.classList.remove('hidden');
             }, 10);
@@ -218,14 +421,40 @@ class UIService {
       });
     };
     
+    // Direct event listeners on each screen representation item
+    const updateScreenListeners = () => {
+      document.querySelectorAll('.screen-representation-item').forEach(screenItem => {
+        if (!screenItem.hasAttribute('data-has-click-listener')) {
+          screenItem.setAttribute('data-has-click-listener', 'true');
+          screenItem.addEventListener('click', e => {
+            console.log('Direct screen representation item click', screenItem);
+            this.selectedControl = screenItem;
+            
+            // Hide control options panel if visible
+            this.controlOptionsPanel.classList.add('hidden');
+            
+            // Show screen options panel
+            this.screenOptionsPanel.style.display = 'flex';
+            setTimeout(() => {
+              this.screenOptionsPanel.classList.remove('hidden');
+            }, 10);
+            
+            e.stopPropagation(); // Prevent bubbling
+          });
+        }
+      });
+    };
+    
     // Initial setup
     updateButtonListeners();
+    updateScreenListeners();
     
-    // Setup a mutation observer to watch for new buttons
+    // Setup a mutation observer to watch for new buttons and screen items
     const observer = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
         if (mutation.addedNodes.length) {
           updateButtonListeners();
+          updateScreenListeners();
         }
       });
     });
@@ -236,14 +465,112 @@ class UIService {
     // Option buttons
     this.moveButton.addEventListener('click', () => this.onMoveControl());
     this.editButton.addEventListener('click', () => this.onEditControl());
+    this.editScreenButton.addEventListener('click', () => this.onEditScreen());
     this.deleteButton.addEventListener('click', () => this.onDeleteControl());
+
+    // New alignment buttons
+    this.alignVerticalButton = document.getElementById('alignVerticalButton');
+    this.alignHorizontalButton = document.getElementById('alignHorizontalButton');
+    if (this.alignVerticalButton) {
+      this.alignVerticalButton.addEventListener('click', () => this.onAlignVertical());
+    }
+    if (this.alignHorizontalButton) {
+      this.alignHorizontalButton.addEventListener('click', () => this.onAlignHorizontal());
+    }
+
+    // New full width button
+    this.stretchWidthButton = document.createElement('button');
+    this.stretchWidthButton.id = 'stretchWidthButton';
+    this.stretchWidthButton.className = 'option-button';
+    this.stretchWidthButton.title = 'Stretch to Logical Width';
+    const img = document.createElement('img');
+    img.src = 'icons/full-width_icon.svg';
+    img.className = 'icon';
+    img.alt = 'Stretch Width';
+    this.stretchWidthButton.appendChild(img);
+    const screenOptionsContainer = this.screenOptionsPanel.querySelector('.screen-options-container');
+    if (screenOptionsContainer) {
+      screenOptionsContainer.appendChild(this.stretchWidthButton);
+    }
+
+    this.stretchWidthButton.addEventListener('click', () => {
+      if (!this.selectedControl) return alert('No screen selected.');
+      const model = this.phoneSelect.value;
+      if (!model) return alert('Please select a phone model.');
+      const phoneData = this.iphoneSizes.find(p => p.model === model);
+      if (!phoneData) return alert('Phone model data not found.');
+
+      let logicalWidth = phoneData.logicalWidth;
+      let logicalHeight = phoneData.logicalHeight;
+      if (this.screenOrientation.value === 'landscape') {
+        [logicalWidth, logicalHeight] = [logicalHeight, logicalWidth];
+      }
+
+      const screenEl = this.selectedControl;
+      const currentWidth = parseFloat(screenEl.style.width) || screenEl.clientWidth;
+      const currentHeight = parseFloat(screenEl.style.height) || screenEl.clientHeight;
+      if (!currentWidth || !currentHeight) return alert('Current screen dimensions are invalid.');
+
+      const aspectRatio = currentHeight / currentWidth;
+      const newWidth = logicalWidth;
+      const newHeight = newWidth * aspectRatio;
+
+      // Update DOM
+      screenEl.style.width = `${newWidth}px`;
+      screenEl.style.height = `${newHeight}px`;
+
+      // Update config
+      const screenIndex = parseInt(screenEl.dataset.screenIndex) - 1;
+      if (screenIndex < 0) return;
+    const cfg = getConfig();
+    if (!cfg.representations?.iphone?.edgeToEdge?.portrait?.screens || !cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex]) return;
+    cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex].outputFrame.width = newWidth;
+    cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex].outputFrame.height = newHeight;
+    updateConfig({ screens: cfg.representations.iphone.edgeToEdge.portrait.screens });
+  });
     
     // Hide when clicking outside
     window.addEventListener('click', e => {
       if (!e.target.closest('.button-representation') && !e.target.closest('#controlOptionsPanel')) {
         this.controlOptionsPanel.classList.add('hidden');
       }
+      if (!e.target.closest('.screen-representation-item') && !e.target.closest('#screenOptionsPanel')) {
+        this.screenOptionsPanel.classList.add('hidden');
+      }
     });
+  }
+
+  onAlignVertical() {
+    if (!this.selectedControl) return;
+    const parentHeight = this.screen.clientHeight;
+    const controlHeight = this.selectedControl.clientHeight;
+    const newTop = Math.round((parentHeight - controlHeight) / 2);
+    this.selectedControl.style.top = `${newTop}px`;
+    this.updateScreenPositionInConfig();
+  }
+
+
+  onAlignHorizontal() {
+    if (!this.selectedControl) return;
+    const parentWidth = this.screen.clientWidth;
+    const controlWidth = this.selectedControl.clientWidth;
+    const newLeft = Math.round((parentWidth - controlWidth) / 2);
+    // When centered, set left position to 0 as per requirement
+    this.selectedControl.style.left = `0px`;
+    this.updateScreenPositionInConfig();
+  }
+
+  updateScreenPositionInConfig() {
+    if (!this.selectedControl) return;
+    const left = parseInt(this.selectedControl.style.left) || 0;
+    const top = parseInt(this.selectedControl.style.top) || 0;
+    const screenIndex = parseInt(this.selectedControl.dataset.screenIndex) - 1;
+    if (screenIndex < 0) return;
+    const cfg = getConfig();
+    if (!cfg.representations?.iphone?.edgeToEdge?.portrait?.screens || !cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex]) return;
+    cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex].outputFrame.x = left;
+    cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex].outputFrame.y = top;
+    updateConfig({ screens: cfg.representations.iphone.edgeToEdge.portrait.screens });
   }
 
   populateDropdowns() {
@@ -394,8 +721,15 @@ class UIService {
         updateConfig({ representations: cfg.representations });
       };
       if (file) reader.readAsDataURL(file);
+    } else if (type === 'dpad') {
+      portrait.items.push({
+        inputs: { up: "up", down: "down", left: "left", right: "right" },
+        frame: { x, y, width: w, height: h },
+        extendedEdges: { top, bottom, left, right }
+      });
+      updateConfig({ representations: cfg.representations });
     } else {
-      portrait.items.push({ inputs: [type], frame: { x,y,width:w,height:h }, extendedEdges: { top,bottom,left,right } });
+      portrait.items.push({ inputs: [type], frame: { x, y, width: w, height: h }, extendedEdges: { top, bottom, left, right } });
       updateConfig({ representations: cfg.representations });
     }
 
@@ -664,7 +998,9 @@ class UIService {
     
     if (itemIndex !== -1) {
       portrait.items[itemIndex] = {
-        inputs: [type],
+        inputs: type === 'dpad'
+          ? { up: "up", down: "down", left: "left", right: "right" }
+          : [type],
         frame: { x, y, width: w, height: h },
         extendedEdges: { top, bottom, left, right }
       };
