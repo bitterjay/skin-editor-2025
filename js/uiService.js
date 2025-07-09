@@ -26,7 +26,7 @@ class UIService {
     this.consoleName = document.getElementById('consoleNameDisplay');
     this.consoleDetailsDisplay = document.getElementById('consoleDetailsDisplay');
     this.fullGameTypeIdentifier = document.getElementById('fullGameTypeIdentifier');
-    this.screen = document.getElementById('screenRepresentation');
+    this.screen = document.getElementById('deviceRepresentation');
     this.screenMessage = document.getElementById('screenMessage');
     this.logicalDisplay = {
       container: document.getElementById('logicalDimensions'),
@@ -91,12 +91,13 @@ class UIService {
   }
 
 
-  bindAddScreenEvents() {
+    bindAddScreenEvents() {
     this.addScreenButton = document.getElementById('addScreenFloating');
     this.addScreenOverlay = document.getElementById('addScreenOverlay');
     this.addScreenForm = document.getElementById('addScreenForm');
     this.confirmAddScreenBtn = document.getElementById('confirmAddScreen');
     this.cancelAddScreenBtn = document.getElementById('cancelAddScreen');
+    this.addScreenHeader = document.getElementById('addScreenHeader'); // Added for header text
 
     this.isEditingScreen = false;
     this.editingScreenIndex = null;
@@ -105,6 +106,8 @@ class UIService {
       this.isEditingScreen = false;
       this.editingScreenIndex = null;
       this.addScreenForm.reset();
+      if (this.addScreenHeader) this.addScreenHeader.textContent = 'Add Screen';
+      if (this.confirmAddScreenBtn) this.confirmAddScreenBtn.textContent = 'Confirm';
       this.addScreenOverlay.style.display = 'flex';
     });
 
@@ -125,40 +128,7 @@ class UIService {
     });
   }
 
-  onEditScreen() {
-    if (!this.selectedControl) return alert('No screen selected to edit.');
-    if (!this.selectedControl.classList.contains('screen-representation-item')) {
-      return alert('Please select a screen to edit first.');
-    }
-    const screenIndexStr = this.selectedControl.dataset.screenIndex;
-    console.log("screenIndexStr: " + screenIndexStr);
-    if (!screenIndexStr) return alert('Selected screen has no index.');
-    const screenIndex = parseInt(screenIndexStr);
-    console.log("screenIndex: " + screenIndex);
-    if (isNaN(screenIndex) || screenIndex < 0) return alert('Invalid screen selected.');
-
-    const cfg = getConfig();
-    console.log(cfg);
-    if (!cfg.representations?.iphone?.edgeToEdge?.portrait?.screens || !cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex]) return alert('Screen data not found.');
-
-    const screenData = cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex];
-
-    // Populate the add screen form with existing data
-    this.addScreenForm.inputX.value = screenData.inputFrame.x;
-    this.addScreenForm.inputY.value = screenData.inputFrame.y;
-    this.addScreenForm.inputWidth.value = screenData.inputFrame.width;
-    this.addScreenForm.inputHeight.value = screenData.inputFrame.height;
-    this.addScreenForm.outputX.value = screenData.outputFrame.x;
-    this.addScreenForm.outputY.value = screenData.outputFrame.y;
-    this.addScreenForm.outputWidth.value = screenData.outputFrame.width;
-    this.addScreenForm.outputHeight.value = screenData.outputFrame.height;
-
-    this.isEditingScreen = true;
-    this.editingScreenIndex = screenIndex;
-
-    this.addScreenOverlay.style.display = 'flex';
-    this.screenOptionsPanel.classList.add('hidden');
-  }
+    
 
   onUpdateScreen() {
     if (this.editingScreenIndex === null) return alert('No screen selected for update.');
@@ -339,7 +309,7 @@ class UIService {
       .addEventListener('click', () => this.overlays.gear.style.display = 'none');
   }
 
-  bindControlOptions() {
+    bindControlOptions() {
     // Initialize the control options panel
     // Force it to be hidden initially
     this.controlOptionsPanel.classList.add('hidden');
@@ -428,6 +398,12 @@ class UIService {
           screenItem.setAttribute('data-has-click-listener', 'true');
           screenItem.addEventListener('click', e => {
             console.log('Direct screen representation item click', screenItem);
+            // Remove active class from all screen items
+            document.querySelectorAll('.screen-representation-item.active').forEach(item => {
+              item.classList.remove('active');
+            });
+            // Add active class to clicked item
+            screenItem.classList.add('active');
             this.selectedControl = screenItem;
             
             // Hide control options panel if visible
@@ -448,7 +424,116 @@ class UIService {
     // Initial setup
     updateButtonListeners();
     updateScreenListeners();
-    
+
+    // Add drag functionality for active screen item
+    let dragState = {
+      dragging: false,
+      startY: 0,
+      startTop: 0,
+      activeItem: null
+    };
+
+    const onMouseMove = (e) => {
+      if (!dragState.dragging || !dragState.activeItem) return;
+      e.preventDefault();
+      const deltaY = e.clientY - dragState.startY;
+      let newTop = dragState.startTop + deltaY;
+
+      // Clamp newTop within parent container bounds
+      const parent = dragState.activeItem.parentElement;
+      const parentHeight = parent.clientHeight;
+      const itemHeight = dragState.activeItem.offsetHeight;
+      newTop = Math.max(0, Math.min(newTop, parentHeight - itemHeight));
+
+      dragState.activeItem.style.top = `${newTop}px`;
+    };
+
+    const onMouseUp = (e) => {
+      if (!dragState.dragging || !dragState.activeItem) return;
+      dragState.dragging = false;
+
+      // Update config with new position
+      const screenIndex = parseInt(dragState.activeItem.dataset.screenIndex);
+      if (!isNaN(screenIndex)) {
+        const cfg = getConfig();
+        if (cfg.representations?.iphone?.edgeToEdge?.portrait?.screens && cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex]) {
+          const newTop = parseInt(dragState.activeItem.style.top) || 0;
+          cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex].outputFrame.y = newTop;
+          updateConfig({ screens: cfg.representations.iphone.edgeToEdge.portrait.screens });
+        }
+      }
+
+      dragState.activeItem = null;
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    const onMouseDown = (e) => {
+      const target = e.target.closest('.screen-representation-item.active');
+      if (!target) return;
+      e.preventDefault();
+      dragState.dragging = true;
+      dragState.startY = e.clientY;
+      dragState.startTop = parseInt(target.style.top) || 0;
+      dragState.activeItem = target;
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    };
+
+    this.screen.addEventListener('mousedown', onMouseDown);
+
+    // Touch events for mobile
+    const onTouchMove = (e) => {
+      if (!dragState.dragging || !dragState.activeItem) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      const deltaY = touch.clientY - dragState.startY;
+      let newTop = dragState.startTop + deltaY;
+
+      const parent = dragState.activeItem.parentElement;
+      const parentHeight = parent.clientHeight;
+      const itemHeight = dragState.activeItem.offsetHeight;
+      newTop = Math.max(0, Math.min(newTop, parentHeight - itemHeight));
+
+      dragState.activeItem.style.top = `${newTop}px`;
+    };
+
+    const onTouchEnd = (e) => {
+      if (!dragState.dragging || !dragState.activeItem) return;
+      dragState.dragging = false;
+
+      const screenIndex = parseInt(dragState.activeItem.dataset.screenIndex);
+      if (!isNaN(screenIndex)) {
+        const cfg = getConfig();
+        if (cfg.representations?.iphone?.edgeToEdge?.portrait?.screens && cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex]) {
+          const newTop = parseInt(dragState.activeItem.style.top) || 0;
+          cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex].outputFrame.y = newTop;
+          updateConfig({ screens: cfg.representations.iphone.edgeToEdge.portrait.screens });
+        }
+      }
+
+      dragState.activeItem = null;
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+    };
+
+    const onTouchStart = (e) => {
+      const target = e.target.closest('.screen-representation-item.active');
+      if (!target) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      dragState.dragging = true;
+      dragState.startY = touch.clientY;
+      dragState.startTop = parseInt(target.style.top) || 0;
+      dragState.activeItem = target;
+
+      document.addEventListener('touchmove', onTouchMove, { passive: false });
+      document.addEventListener('touchend', onTouchEnd);
+    };
+
+    this.screen.addEventListener('touchstart', onTouchStart);
+
     // Setup a mutation observer to watch for new buttons and screen items
     const observer = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
@@ -520,7 +605,7 @@ class UIService {
       screenEl.style.height = `${newHeight}px`;
 
       // Update config
-      const screenIndex = parseInt(screenEl.dataset.screenIndex) - 1;
+      const screenIndex = parseInt(screenEl.dataset.screenIndex);
       if (screenIndex < 0) return;
     const cfg = getConfig();
     if (!cfg.representations?.iphone?.edgeToEdge?.portrait?.screens || !cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex]) return;
@@ -536,7 +621,75 @@ class UIService {
       }
       if (!e.target.closest('.screen-representation-item') && !e.target.closest('#screenOptionsPanel')) {
         this.screenOptionsPanel.classList.add('hidden');
+        // Remove active class from any active screen
+        document.querySelectorAll('.screen-representation-item.active').forEach(item => {
+          item.classList.remove('active');
+        });
+        this.selectedControl = null;
       }
+    });
+
+    // New aspect ratio button
+    this.aspectRatioButton = document.createElement('button');
+    this.aspectRatioButton.id = 'aspectRatioButton';
+    this.aspectRatioButton.className = 'option-button';
+    this.aspectRatioButton.title = 'Adjust Height to Console Aspect Ratio';
+    const aspectRatioImg = document.createElement('img');
+    aspectRatioImg.src = 'icons/aspect-ratio_icon.svg';
+    aspectRatioImg.className = 'icon';
+    aspectRatioImg.alt = 'Aspect Ratio';
+    this.aspectRatioButton.appendChild(aspectRatioImg);
+    if (screenOptionsContainer) {
+      screenOptionsContainer.appendChild(this.aspectRatioButton);
+    }
+
+    this.aspectRatioButton.addEventListener('click', () => {
+      if (!this.selectedControl) return alert('No screen selected.');
+      const screenEl = this.selectedControl;
+      const screenIndex = parseInt(screenEl.dataset.screenIndex);
+      if (screenIndex < 0) return alert('Invalid screen selected.');
+
+      const cfg = getConfig();
+      if (!cfg.representations?.iphone?.edgeToEdge?.portrait?.screens || !cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex]) {
+        return alert('Screen data not found.');
+      }
+      const screenData = cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex];
+
+      // Get the current outputFrame width
+      const currentWidth = screenData.outputFrame.width;
+      if (!currentWidth) return alert('Current outputFrame width is invalid.');
+
+      // Get the console aspect ratio from the gameTypeIdentifier
+      const gameTypeIdentifier = cfg.gameTypeIdentifier;
+      if (!gameTypeIdentifier) return alert('No console selected.');
+
+      const consoleKey = gameTypeIdentifier.split('.').pop();
+      if (!consoleKey) return alert('Invalid console key.');
+
+      // Load aspect ratios from the JSON file
+      fetch('Reference/console-aspect-ratios.json')
+        .then(response => response.json())
+        .then(aspectRatios => {
+          const ratioStr = aspectRatios[consoleKey];
+          if (!ratioStr) return alert('Aspect ratio not found for console: ' + consoleKey);
+
+          // Parse ratio string like "4/3"
+          const [wRatio, hRatio] = ratioStr.split('/').map(Number);
+          if (!wRatio || !hRatio) return alert('Invalid aspect ratio format.');
+
+          // Calculate new height based on current width and aspect ratio
+          const newHeight = currentWidth * (hRatio / wRatio);
+
+          // Update DOM element height
+          screenEl.style.height = `${newHeight}px`;
+
+          // Update config outputFrame height
+          cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex].outputFrame.height = newHeight;
+          updateConfig({ screens: cfg.representations.iphone.edgeToEdge.portrait.screens });
+        })
+        .catch(err => {
+          alert('Failed to load aspect ratios: ' + err.message);
+        });
     });
   }
 
@@ -554,17 +707,89 @@ class UIService {
     if (!this.selectedControl) return;
     const parentWidth = this.screen.clientWidth;
     const controlWidth = this.selectedControl.clientWidth;
-    const newLeft = Math.round((parentWidth - controlWidth) / 2);
-    // When centered, set left position to 0 as per requirement
-    this.selectedControl.style.left = `0px`;
+    let newLeft = Math.round((parentWidth - controlWidth) / 2);
+    newLeft = newLeft - 2; // Adjust by -2px as requested
+    this.selectedControl.style.left = `${newLeft}px`;
     this.updateScreenPositionInConfig();
+  }
+  
+  bindAddScreenEvents() {
+    this.addScreenButton = document.getElementById('addScreenFloating');
+    this.addScreenOverlay = document.getElementById('addScreenOverlay');
+    this.addScreenForm = document.getElementById('addScreenForm');
+    this.confirmAddScreenBtn = document.getElementById('confirmAddScreen');
+    this.cancelAddScreenBtn = document.getElementById('cancelAddScreen');
+    this.addScreenHeader = document.getElementById('addScreenHeader'); // Added for header text
+
+    this.isEditingScreen = false;
+    this.editingScreenIndex = null;
+
+    this.addScreenButton.addEventListener('click', () => {
+      this.isEditingScreen = false;
+      this.editingScreenIndex = null;
+      this.addScreenForm.reset();
+      if (this.addScreenHeader) this.addScreenHeader.textContent = 'Add Screen';
+      if (this.confirmAddScreenBtn) this.confirmAddScreenBtn.textContent = 'Confirm';
+      this.addScreenOverlay.style.display = 'flex';
+    });
+
+    this.cancelAddScreenBtn.addEventListener('click', () => {
+      this.isEditingScreen = false;
+      this.editingScreenIndex = null;
+      this.addScreenOverlay.style.display = 'none';
+      this.addScreenForm.reset();
+    });
+
+    this.addScreenForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (this.isEditingScreen) {
+        this.onUpdateScreen();
+      } else {
+        this.onAddScreen();
+      }
+    });
+  }
+
+  onEditScreen() {
+    if (!this.selectedControl) return alert('No screen selected to edit.');
+    if (!this.selectedControl.classList.contains('screen-representation-item')) {
+      return alert('Please select a screen to edit first.');
+    }
+    const screenIndexStr = this.selectedControl.dataset.screenIndex;
+    if (!screenIndexStr) return alert('Selected screen has no index.');
+    const screenIndex = parseInt(screenIndexStr);
+    if (isNaN(screenIndex) || screenIndex < 0) return alert('Invalid screen selected.');
+
+    const cfg = getConfig();
+    if (!cfg.representations?.iphone?.edgeToEdge?.portrait?.screens || !cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex]) return alert('Screen data not found.');
+
+    const screenData = cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex];
+
+    // Populate the add screen form with existing data
+    this.addScreenForm.inputX.value = screenData.inputFrame.x;
+    this.addScreenForm.inputY.value = screenData.inputFrame.y;
+    this.addScreenForm.inputWidth.value = screenData.inputFrame.width;
+    this.addScreenForm.inputHeight.value = screenData.inputFrame.height;
+    this.addScreenForm.outputX.value = screenData.outputFrame.x;
+    this.addScreenForm.outputY.value = screenData.outputFrame.y;
+    this.addScreenForm.outputWidth.value = screenData.outputFrame.width;
+    this.addScreenForm.outputHeight.value = screenData.outputFrame.height;
+
+    this.isEditingScreen = true;
+    this.editingScreenIndex = screenIndex;
+
+    if (this.addScreenHeader) this.addScreenHeader.textContent = 'Edit Screen';
+    if (this.confirmAddScreenBtn) this.confirmAddScreenBtn.textContent = 'Update';
+
+    this.addScreenOverlay.style.display = 'flex';
+    this.screenOptionsPanel.classList.add('hidden');
   }
 
   updateScreenPositionInConfig() {
     if (!this.selectedControl) return;
     const left = parseInt(this.selectedControl.style.left) || 0;
     const top = parseInt(this.selectedControl.style.top) || 0;
-    const screenIndex = parseInt(this.selectedControl.dataset.screenIndex) - 1;
+    const screenIndex = parseInt(this.selectedControl.dataset.screenIndex);
     if (screenIndex < 0) return;
     const cfg = getConfig();
     if (!cfg.representations?.iphone?.edgeToEdge?.portrait?.screens || !cfg.representations.iphone.edgeToEdge.portrait.screens[screenIndex]) return;

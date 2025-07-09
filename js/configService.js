@@ -27,6 +27,7 @@ export async function loadConfig() {
             portrait: {
               assets: {},
               items: [],
+              screens: [],
               mappingSize: { width: 0, height: 0 },
               extendedEdges: {},
               menuInsets: {}
@@ -57,10 +58,31 @@ export function getConfig() {
  * @param {Object} updates Partial config fields to merge.
  */
 export function updateConfig(updates) {
+  const baseConfig = getConfig();
   currentConfig = {
-    ...getConfig(),
+    ...baseConfig,
     ...updates
   };
+
+  // Reorder keys to place 'screens' between 'mappingSize' and 'extendedEdges' if present
+  if (currentConfig.screens && currentConfig.representations?.iphone?.edgeToEdge?.portrait) {
+    const portrait = currentConfig.representations.iphone.edgeToEdge.portrait;
+    const { mappingSize, extendedEdges, ...restPortrait } = portrait;
+
+    // Rebuild portrait with keys in desired order
+    currentConfig.representations.iphone.edgeToEdge.portrait = {
+      ...restPortrait,
+      mappingSize,
+      screens: currentConfig.screens,
+      extendedEdges
+    };
+
+    // Remove screens from top-level if exists to avoid duplication
+    if ('screens' in currentConfig) {
+      delete currentConfig.screens;
+    }
+  }
+
   localStorage.setItem('currentConfig', JSON.stringify(currentConfig));
   return currentConfig;
 }

@@ -79,7 +79,7 @@
 
   <!-- work area-->
   <div id="workArea">
-    <div id="screenRepresentation" style="border: 1px solid black; display: flex; justify-content: center; align-items: center; background-color:white;">
+    <div id="deviceRepresentation" style="border: 1px solid black; display: flex; justify-content: center; align-items: center; background-color:white;">
       <div id="screenMessage" style="font-size: 24px; color: #666;">Select a phone size to get started</div>
     </div>
     <div id="currentInfo">
@@ -108,6 +108,11 @@
     <div id="addButtonFloating" class="disabled">
       <img src="icons/plus_icon.svg" class="icon" alt="Add Button" />
     </div>
+  </div>
+
+  <!-- Add Screen Floating Button -->
+  <div id="addScreenFloating">
+    <img src="icons/screen_icon.svg" class="icon" alt="Add Screen" />
   </div>
 
   <div class="overlay" id="addControlOverlay">
@@ -189,6 +194,56 @@
       <button id="deleteButton" class="option-button">
         <img src="icons/delete_icon.svg" class="icon" alt="Delete Control" />
       </button>
+    </div>
+  </div>
+
+  <!-- Screen options panel for screen editing (empty for now) -->
+  <div id="screenOptionsPanel" class="screen-options-panel hidden">
+    <div class="screen-options-container">
+      <button id="alignVerticalButton" class="option-button" title="Align Vertically">
+        <img src="icons/align-center-vertical_icon.svg" class="icon" alt="Align Vertically" />
+      </button>
+      <button id="alignHorizontalButton" class="option-button" title="Align Horizontally">
+        <img src="icons/align-center-horizontal_icon.svg" class="icon" alt="Align Horizontally" />
+      </button>
+      <button id="editScreenButton" class="option-button" title="Edit Screen">
+        <img src="icons/edit_icon.svg" class="icon" alt="Edit Screen" />
+      </button>
+    </div>
+  </div>
+
+  <!-- Add Screen Overlay -->
+  <div class="overlay" id="addScreenOverlay" style="display: none;">
+    <div class="overlay-content">
+      <h2>Add Screen</h2>
+      <form id="addScreenForm">
+        <fieldset>
+          <legend>Input Frame</legend>
+          <label for="inputX">X</label>
+          <input type="number" id="inputX" name="inputX" value="0" required />
+          <label for="inputY">Y</label>
+          <input type="number" id="inputY" name="inputY" value="0" required />
+          <label for="inputWidth">Width</label>
+          <input type="number" id="inputWidth" name="inputWidth" value="256" required />
+          <label for="inputHeight">Height</label>
+          <input type="number" id="inputHeight" name="inputHeight" value="192" required />
+        </fieldset>
+        <fieldset>
+          <legend>Output Frame</legend>
+          <label for="outputX">X</label>
+          <input type="number" id="outputX" name="outputX" value="0" required />
+          <label for="outputY">Y</label>
+          <input type="number" id="outputY" name="outputY" value="103" required />
+          <label for="outputWidth">Width</label>
+          <input type="number" id="outputWidth" name="outputWidth" value="320" required />
+          <label for="outputHeight">Height</label>
+          <input type="number" id="outputHeight" name="outputHeight" value="213" required />
+        </fieldset>
+        <div style="display: flex; gap: 10px; margin-top: 16px;">
+          <button type="submit" id="confirmAddScreen" class="confirm-button">Confirm</button>
+          <button type="button" id="cancelAddScreen" class="cancel-button">Cancel</button>
+        </div>
+      </form>
     </div>
   </div>
 

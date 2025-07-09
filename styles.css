@@ -92,7 +92,7 @@ header {
 
 button {
     padding: var(--button-padding-vertical) var(--button-padding-horizontal);
-    margin: 8px;
+    margin: 4px;
     font-size: var(--icon-font-size);
     cursor: pointer;
     /* background-color: var(--clr-tooltip-bg); */
@@ -317,7 +317,7 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     background-color: var(--clr-background);
 }
 
-#screenRepresentation {
+#deviceRepresentation {
     transform:scale(.9);
     width:100%;
     height:-webkit-fill-available;
@@ -342,6 +342,28 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     z-index: 800;
 }
 
+/* Add Screen Floating Button (bottom left) */
+#addScreenFloating {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--clr-tooltip-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 800;
+}
+#addScreenFloating .icon {
+    width: 24px;
+    height: 24px;
+    fill: var(--white);
+}
+
 #currentInfo {
     position:relative;
     display: flex;
@@ -349,7 +371,7 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     align-items: center;
     justify-content: center;
     height: -webkit-fill-available;
-    background-color: var(--clr-background)
+    background-color: var(--clr-background);
     padding: 20px;
     box-sizing: border-box;
     border-radius: var(--button-radius);
@@ -364,7 +386,7 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
 
 .confirm-button {
     margin-top: 20px;
-    background-color: var(--clr-btn-bg)
+    background-color: var(--clr-btn-bg);
     color: var(--clr-text);
     border: var(--clr-icon-border);
     padding: 10px 20px;
@@ -422,7 +444,7 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     width: 100%;
 }
 
-.control-options-panel {
+.control-options-panel, .screen-options-panel {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -434,20 +456,20 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     z-index: 1000; /* Ensure it is above other elements */
 }
 
-.control-options-container {
+.control-options-container, .screen-options-container {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 0px;
     padding: 0;
     margin: 0;
-    border: 1px solid #ccc;
+    /* border: 1px solid #ccc; */
     border-radius:var(--button-radius);
     background-color: var(--clr-tooltip-bg);
     backdrop-filter: blur(10px);
     
 }
 
-.control-options-panel.hidden {
+.control-options-panel.hidden, .screen-options-container.help-text {
     transform: translateY(100%);
 }
 
@@ -465,7 +487,7 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     background: var(--white);
     color: black;
     border: none;
-    padding: 12px 24px;
+    padding: 6px 12px;
     border-radius: var(--button-radius);
     cursor: pointer;
     font-weight: bold;
@@ -539,4 +561,11 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
 
 .color-picker {
     margin-bottom:32px;
+}
+
+/* Active screen indicator */
+.screen-representation-item.active {
+    border: 2px solid #19c419 !important;
+    box-sizing: border-box;
+    z-index: 1001;
 }
